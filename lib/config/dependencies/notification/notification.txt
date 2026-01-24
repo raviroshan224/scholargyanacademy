@@ -1,0 +1,195 @@
+
+
+Setup For IOS
+ Inside HandleNotification:
+
+Listening for Messages on iOS:
+ Implement FirebaseMessaging.onMessage.listen to handle incoming notifications when the
+ app is in the foreground. This listener should generate a random notification ID and,
+ if the platform is iOS, use LocalNotificationManager to display the notification.
+
+FirebaseMessaging.onMessage.listen((RemoteMessage? event) {
+  var random = Random();
+  var notificationID = random.nextInt(100); // Generates a number between 0 and 99
+
+  if (event?.notification != null) {
+    if (Platform.isIOS) {
+      LocalNotificationManager.onDidReceiveLocalNotification(
+        notificationID,
+        event.notification?.title,
+        event.notification?.body,
+        '');
+    }
+    LocalNotificationManager.createNDisplayNotification(event);
+  }
+});
+
+
+2. Declaring Permission for iOS in LocalNotificationManager:
+    Ensure that iOS permission is requested during initialization.
+    This step is crucial for prompting the user to allow notifications.
+
+
+    static Future<void> initialize() async {
+      if (Platform.isIOS) {
+        requestIOSPermission();
+      } else if (Platform.isAndroid) {
+        requestAndroidPermission();
+      }
+    }
+
+    static Future<void> requestIOSPermission() async {
+      _notificationsPlugin
+          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()!
+          .requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
+    }
+
+   3. Initialize IOS Settings
+   During platform initialization, specify iOS settings, including permissions for sound, badge,
+   and alert, along with handling local notifications through onDidReceiveLocalNotification.
+
+     /*. Initialize Platforms*/
+   static void initializePlatform() {
+     const DarwinInitializationSettings initializationSettingsIOS =
+       DarwinInitializationSettings(
+         requestSoundPermission: true,
+         requestBadgePermission: true,
+         requestAlertPermission: true,
+         onDidReceiveLocalNotification: onDidReceiveLocalNotification,
+       );
+     // Continue with initialization settings for Android and plugin initialization
+   }
+
+   4. Handling Local Notifications on iOS:
+      Implement onDidReceiveLocalNotification to manage the behavior when a local
+      notification is received on iOS.
+
+   5.  Adding Notification Details:
+      Use getNotificationDetails to specify notification details for both Android and iOS,
+      allowing for customized notification handling on each platform.
+
+    onDidReceiveLocalNotification: onDidReceiveLocalNotification,
+        The one we create in HandleNotification
+
+  static Future<NotificationDetails> getNotificationDetails(RemoteMessage? message) async {
+    notificationDetails = NotificationDetails(
+        android: await androidNotificationDetails(message),
+        iOS: await iosNotificationDetails(message));
+    return notificationDetails;
+  }
+
+  6. Specifying iOS Notification Details:
+     Customize iOS notification details within iosNotificationDetails.
+     This customization can include alert presentation, badge count, sound, and more.
+
+    static Future<DarwinNotificationDetails> iosNotificationDetails(
+          RemoteMessage? message) async {
+      return const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        subtitle: 'Notification App Name', // Customize your app name or subtitle here
+      );
+    }
+
+
+7. In the AppDelegate.swift
+    import Flutter
+    import Firebase
+    import FirebaseMessaging
+
+ 8. @UIApplicationMain
+    @objc class AppDelegate: FlutterAppDelegate {
+      override func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+      ) -> Bool {
+        FirebaseApp.configure()
+        GeneratedPluginRegistrant.register(with: self)
+          // Request notification permissions from the user
+              if #available(iOS 10.0, *) {
+                  let center = UNUserNotificationCenter.current()
+                  center.delegate = self as? UNUserNotificationCenterDelegate
+                  center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+                      // Enable or disable features based on authorization
+                      if granted {
+                          DispatchQueue.main.async {
+                              application.registerForRemoteNotifications()
+                          }
+                      }
+                  }
+              }
+
+
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+      }
+
+   9. override func application(_ application:UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data){
+                    Messaging.messaging().apnsToken = deviceToken
+                    super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+                }
+
+     10. // Handle notification when app is in the foreground
+              override func userNotificationCenter(_ center: UNUserNotificationCenter,
+                willPresent notification: UNNotification,
+                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+              ) {
+                completionHandler([.alert, .sound, .badge])
+              }
+
+
+      11.  // Handle notification response (e.g., user taps on the notification)
+            override func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+              let userInfo = response.notification.request.content.userInfo
+              // Handle the notification content or user interaction with it here
+              completionHandler()
+            }
+
+      12. Go to Project Runner --> Signing and Capabilities
+      Add Capability after you sign in with team id.
+       a. Add Background modes:
+        - Remote Notification
+        - Background Fetch
+        - Background Processing
+
+       b. Push Notifications
+
+
+     13. To set up your iOS app in Firebase to receive data messages in the background,
+      you need to configure Apple Push Notification service (APNs) certificates in the
+      Firebase console. This process involves several steps, both in your Apple Developer
+      account and in the Firebase console. Here's a general outline of the steps you need to follow:
+
+     Step 1: Create an APNs Key or Certificate
+
+     Log in to the Apple Developer Portal:
+     Go to the Apple Developer Portal and sign in with your Apple developer account.
+
+     Generate an APNs Key or Certificate:
+     For most cases, it's recommended to create an APNs Key, as it can be used for multiple
+      applications and does not expire.
+     Navigate to "Certificates, Identifiers & Profiles" > "Keys" > "+", and follow the prompts
+      to create a new APNs key. Make sure to select the "Apple Push Notifications service (APNs)"
+      checkbox when creating the key.
+     After the key is created, download it to your computer and note the Key ID.
+
+    15.Configure the info.plist file
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>processing</string>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+
+
+
+///  Notifications
+
+flutter pub add firebase_messaging && flutter pub add firebase_core && flutter pub add device_info_plus
+&& flutter pub add flutter_local_notifications  && flutter pub add firebase_crashlytics
+
+ npm install -g npm@10.9.1 to update!
