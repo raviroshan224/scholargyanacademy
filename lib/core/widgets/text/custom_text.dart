@@ -29,6 +29,8 @@ class CText extends StatelessWidget {
   final FontWeight? fontWeight;
   final double? fontSize;
   final double? lineHeight;
+  final double? height;
+  final double? letterSpacing;
   final TextDecoration? textDecoration; // ✅ Added for underline support
 
   const CText(
@@ -42,6 +44,8 @@ class CText extends StatelessWidget {
     this.overflow,
     this.fontSize,
     this.lineHeight,
+    this.height,
+    this.letterSpacing,
     this.textDecoration, // ✅ Accept underline
   });
 
@@ -103,7 +107,8 @@ class CText extends StatelessWidget {
       color: color,
       fontWeight: fontWeight,
       fontSize: fontSize,
-      height: lineHeight,
+      height: height ?? lineHeight,
+      letterSpacing: letterSpacing,
       decoration: textDecoration, // ✅ Apply underline if provided
     );
   }

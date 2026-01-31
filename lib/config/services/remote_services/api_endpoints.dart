@@ -1,9 +1,13 @@
 class ApiEndPoints {
   static const String baseUrl = 'https://scholargyan.onecloudlab.com/api/v1/';
+  // Base URL used for images when the API returns only filenames
+  static const String imageBaseUrl =
+      'https://olp-uploads.s3.us-east-1.amazonaws.com/';
 
   /// Home Endpoints
   static const String homepage = 'homepage';
   static const String homepageLatestCategory = 'homepage/latest-category';
+  static const String homepageSearch = 'homepage/search';
 
   /// Authentication Endpoints
   static const String userSignUpUrl = 'auth/email/register';
@@ -107,6 +111,7 @@ class ApiEndPoints {
   static const String enrollmentsById = 'enrollments'; // + '/{id}'
   static const String enrollmentsCourseDetails =
       'enrollments/courses'; // + '/{courseId}/details'
+  static const String enrollFreeCourse = 'enrollments/free-course';
   static const String liveClassesMyClasses = 'live-classes/my-classes';
   static const String lectures = 'lectures'; // + '/{id}'
   static const String lecturesFree = 'lectures/free';
@@ -114,6 +119,7 @@ class ApiEndPoints {
       'lectures/subject'; // + '/{subjectId}'
   static const String lectureAdminPreview =
       'lectures/admin'; // + '/{id}/preview'
+  static const String completeLecture = 'enrollments/progress/complete-lecture';
 
   /// Message Endpoints
   static const String conversations = 'message-app/conversations';

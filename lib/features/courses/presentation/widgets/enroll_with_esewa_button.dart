@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/core/services/simple_payment_service.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../../core/constant/app_colors.dart';
+import '../../../../core/services/simple_payment_service.dart';
+import '../../../../core/widgets/buttons/reusable_buttons.dart';
+import '../../../auth/view_model/providers/auth_providers.dart';
 
 class EnrollWithEsewaButton extends ConsumerStatefulWidget {
   const EnrollWithEsewaButton({

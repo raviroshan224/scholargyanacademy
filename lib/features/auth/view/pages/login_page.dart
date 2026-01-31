@@ -45,10 +45,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: ListView(
             children: [
               AppSpacing.verticalSpaceLarge,
-              Image.asset(
-                AppAssets.loginBg,
-                height: AppSpacing.screenHeight(context) * 0.30,
-              ),
+              AppSpacing.verticalSpaceLarge,
+              Image.asset(AppAssets.appLogo, height: 124),
+              AppSpacing.verticalSpaceMedium,
+              AppSpacing.verticalSpaceMedium,
               AppSpacing.verticalSpaceMedium,
               CText(
                 textAlign: TextAlign.center,
@@ -113,6 +113,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       width: double.infinity,
                       child: ReusableButton(
                         text: AppStrings.signIn,
+                        backgroundColor: AppColors.success,
                         isLoading: loginViewModel.isLoading,
                         onPressed: loginViewModel.isLoading
                             ? null

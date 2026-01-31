@@ -6,7 +6,7 @@ export 'presentation/pages/home_page.dart';
 
 export 'presentation/widgets/course_track_card.dart';
 export 'presentation/widgets/grab_the_deal.dart';
-export 'presentation/widgets/home_course_card.dart';
+// export 'presentation/widgets/home_course_card.dart';
 export 'presentation/widgets/live_classes.dart';
 export 'presentation/widgets/recommended_course.dart';
 

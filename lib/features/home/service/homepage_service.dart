@@ -34,12 +34,10 @@ class HomepageServiceImpl implements HomepageService {
       (success) {
         final data = success.data;
         try {
-          final uri = success.requestOptions.uri;
-          final status = success.statusCode;
-          final headersMap = success.headers.map;
-          print('[log] ✅ Response [${status}] ${uri.toString()}');
-          print('[log] ✅ Headers: ${headersMap}');
-          print('I/flutter: Homepage raw response -> ${success.data}');
+          // final uri = success.requestOptions.uri;
+          // final status = success.statusCode;
+          // final headersMap = success.headers.map;
+          // print('[log] ✅ Response [${status}] ${uri.toString()}');
         } catch (_) {}
         if (data is Map<String, dynamic>) {
           return Right(HomepageResponse.fromJson(data));

@@ -52,6 +52,7 @@ class EnrollmentCourse {
   final String courseTitle;
   final String? courseDescription;
   final String? courseImageUrl;
+  final String? courseIconUrl;
   final int? enrollmentCost;
   final int? durationHours;
   final int? validityDays;
@@ -64,6 +65,7 @@ class EnrollmentCourse {
     required this.courseTitle,
     this.courseDescription,
     this.courseImageUrl,
+    this.courseIconUrl,
     this.enrollmentCost,
     this.durationHours,
     this.validityDays,
@@ -78,6 +80,7 @@ class EnrollmentCourse {
         courseTitle: json['courseTitle'] ?? '',
         courseDescription: json['courseDescription'],
         courseImageUrl: json['courseImageUrl'],
+        courseIconUrl: json['courseIconUrl'],
         enrollmentCost: json['enrollmentCost'],
         durationHours: json['durationHours'],
         validityDays: json['validityDays'],

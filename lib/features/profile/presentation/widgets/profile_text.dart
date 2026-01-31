@@ -10,7 +10,7 @@ class ProfileTextRow extends StatelessWidget {
   final bool? showSubTitle;
   final bool? hideArrow;
   final VoidCallback? onClick;
-  final String icon;
+  final IconData icon;
   final VoidCallback onPressed;
   final bool isLoading;
 
@@ -37,7 +37,7 @@ class ProfileTextRow extends StatelessWidget {
         padding: const EdgeInsets.only(top: 8.0, bottom: 8),
         child: Row(
           children: [
-            SvgPicture.asset(icon),
+            Icon(icon),
             AppSpacing.horizontalSpaceAverage,
             CText(
               cardTitle,

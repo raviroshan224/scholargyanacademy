@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/auth/view/pages/login_page.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
 import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
+
+import '../../../core/methods/app_methods.dart';
+import '../view/pages/login_page.dart';
+import 'auth_state.dart';
 
 final isResetPasswordVisibleProvider = StateProvider<bool>((Ref ref) => false);
 final isResetConfirmPasswordVisibleProvider = StateProvider<bool>(

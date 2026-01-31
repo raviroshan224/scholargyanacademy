@@ -10,7 +10,12 @@ import '../../widgets/remarks_section.dart';
 import 'solution_page.dart';
 
 class ResultPage extends ConsumerStatefulWidget {
-  const ResultPage({super.key});
+  const ResultPage({
+    super.key,
+    this.showDoneButton = true,
+  });
+
+  final bool showDoneButton;
 
   @override
   ConsumerState<ResultPage> createState() => _ResultPageState();
@@ -75,8 +80,8 @@ class _ResultPageState extends ConsumerState<ResultPage> {
       attempted = 0;
     }
     final percentage = evaluation?.scorePercentage ?? summary?.percentage ?? 0;
-    final remarks = evaluation?.feedback ??
-        'Your test has been submitted successfully. Review the details below.';
+    // final remarks = evaluation?.feedback ??
+    //     'Your test has been submitted successfully. Review the details below.';
 
     if (resultState.isLoading && !hasEvaluation) {
       return const Scaffold(
@@ -136,38 +141,41 @@ class _ResultPageState extends ConsumerState<ResultPage> {
                         },
             ),
             AppSpacing.verticalSpaceLarge,
-            RemarksSection(remarks: remarks),
-            AppSpacing.verticalSpaceLarge,
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
-              color: AppColors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CText('Next Steps',
-                        type: TextType.headlineMedium, color: AppColors.black),
-                    AppSpacing.verticalSpaceAverage,
-                    const CText(
-                      'Review your answers and revisit weak topics to improve your score.',
-                      type: TextType.bodySmall,
-                    ),
-                    AppSpacing.verticalSpaceLarge,
-                    ReusableButton(
-                      text: 'Done',
-                      backgroundColor: AppColors.primary,
-                      onPressed: () {
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                      },
-                    ),
-                  ],
+            // RemarksSection(remarks: remarks),
+            if (widget.showDoneButton) ...[
+              AppSpacing.verticalSpaceLarge,
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 0,
+                color: AppColors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CText('Next Steps',
+                          type: TextType.headlineMedium,
+                          color: AppColors.black),
+                      AppSpacing.verticalSpaceAverage,
+                      const CText(
+                        'Review your answers and revisit weak topics to improve your score.',
+                        type: TextType.bodySmall,
+                      ),
+                      AppSpacing.verticalSpaceLarge,
+                      ReusableButton(
+                        text: 'Done',
+                        backgroundColor: AppColors.primary,
+                        onPressed: () {
+                          Navigator.popUntil(context, (route) => route.isFirst);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

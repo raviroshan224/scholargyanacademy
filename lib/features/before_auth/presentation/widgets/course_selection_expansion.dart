@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:scholarsgyanacademy/features/profile/data/models/favorite_category_model.dart';
 
 import '../../../../core/core.dart';
+import '../../../profile/data/models/favorite_category_model.dart';
 
 class CourseSelectionItem extends StatelessWidget {
   final String title;

@@ -5,11 +5,11 @@ import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:scholarsgyanacademy/network_layer/src/error_handler.dart';
 
 import 'api_config.dart';
 import 'enum.dart';
 import 'error.dart';
+import 'error_handler.dart';
 import 'middleware.dart';
 
 enum HttpMethod { get, post, put, patch, delete }

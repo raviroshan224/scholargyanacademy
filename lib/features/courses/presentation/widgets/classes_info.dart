@@ -11,34 +11,13 @@ class ClassesInfo extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(coursesViewModelProvider);
-    
+
     // CRITICAL: Check enrollment first
     // Live classes API requires enrollment
     if (!state.isEnrolled) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: const [
-              Icon(
-                Icons.lock_outline,
-                size: 64,
-                color: AppColors.gray400,
-              ),
-              SizedBox(height: 16),
-              CText(
-                'Enroll in this course to access live classes',
-                type: TextType.bodyLarge,
-                textAlign: TextAlign.center,
-                color: AppColors.gray700,
-              ),
-            ],
-          ),
-        ),
-      );
+      return const Center(child: CText('Enroll to access classes'));
     }
-    
+
     // For enrolled users: show classes from API
     final schedule = state.classes;
 

@@ -20,6 +20,9 @@ class VideoPlayerPage extends ConsumerStatefulWidget {
     this.headers,
     this.lectureId,
     this.getWatchUrl,
+    this.thumbnailUrl,
+    this.processingStatus,
+    this.startPositionSeconds,
   });
 
   final String url;
@@ -27,39 +30,45 @@ class VideoPlayerPage extends ConsumerStatefulWidget {
   final Map<String, String>? headers;
   final String? lectureId;
   final WatchUrlResolver? getWatchUrl;
+  final String? thumbnailUrl;
+  final String? processingStatus;
+  
+  /// If provided, seek to this position (in seconds) when video starts playing
+  final int? startPositionSeconds;
 
   @override
   ConsumerState<VideoPlayerPage> createState() => _VideoPlayerPageState();
 }
 
-class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
-  VideoPlayerController? _videoController;
+class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> with WidgetsBindingObserver {
   ChewieController? _chewieController;
+  VideoPlayerController? _videoPlayerController;
 
   bool _isFetchingLink = false;
-  bool _isInitializingPlayer = false;
   String? _errorMessage;
+  bool _hasMarkedComplete = false;
 
   String? _activeUrl;
   Map<String, String>? _activeHeaders;
 
-  final List<_ProbeLog> _probeLogs = <_ProbeLog>[];
-
   int _loadToken = 0;
   int _autoRefreshAttempts = 0;
-
-  bool get _isLoading => _isFetchingLink || _isInitializingPlayer;
 
   @override
   void initState() {
     super.initState();
-    _preparePlayback(forceRefresh: false, origin: 'initial load');
+    WidgetsBinding.instance.addObserver(this);
+    // Delay initialization until after first frame to ensure smooth transition
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _preparePlayback(forceRefresh: false, origin: 'initial load');
+    });
   }
 
   @override
   void didUpdateWidget(covariant VideoPlayerPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     final urlChanged = oldWidget.url != widget.url;
+    // Map equality check (could be improved with deeper check if needed)
     final headersChanged = !_mapEquals(oldWidget.headers, widget.headers);
     if (urlChanged || headersChanged) {
       _preparePlayback(forceRefresh: true, origin: 'widget update');
@@ -67,33 +76,193 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      _videoPlayerController?.pause();
+    }
+  }
+
+  @override
   void dispose() {
-    unawaited(_disposeControllers());
+    WidgetsBinding.instance.removeObserver(this);
+    _disposeControllers();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chewie = _chewieController;
+    final bool isProcessing = widget.processingStatus != null &&
+        widget.processingStatus != 'ready';
+    
+    // Determine state
+    final bool showLoading = _isFetchingLink || isProcessing;
+    final bool showPlayer = chewie != null && !showLoading && _errorMessage == null;
+    final bool showError = _errorMessage != null && !_isFetchingLink;
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Video Player Center Stage
+            if (showPlayer)
+              Center(
+                child: Chewie(controller: chewie),
+              ),
+
+            // Thumbnail + Loading Overlay
+            if (!_isPlayingOrReady() && !showError)
+               _buildLoadingOverlay(isProcessing: isProcessing),
+
+            // Error State
+            if (showError)
+              _buildErrorState(),
+              
+             // Back Button (custom if Chewie doesn't show it or we need an overlay)
+             // Chewie usually handles this, so we rely on Chewie's Cupertino controls or Material controls
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _isPlayingOrReady() {
+    return _videoPlayerController != null &&
+        _videoPlayerController!.value.isInitialized &&
+        !_isFetchingLink;
+  }
+
+  Widget _buildLoadingOverlay({required bool isProcessing}) {
+    final String message = isProcessing
+        ? 'Video is being processed...'
+        : _isFetchingLink
+            ? 'Requesting video link...'
+            : 'Loading video...';
+
+    return Container(
+      color: Colors.black,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Thumbnail placeholder
+          if (widget.thumbnailUrl != null && widget.thumbnailUrl!.isNotEmpty)
+            Positioned.fill(
+              child: CustomCachedNetworkImage(
+                imageUrl: widget.thumbnailUrl!,
+                fitStatus: BoxFit.contain,
+              ),
+            ),
+          // Dark overlay with loading indicator
+          Positioned.fill(
+            child: Container(
+              color: Colors.black54,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (isProcessing)
+                    const Icon(
+                      Icons.hourglass_bottom,
+                      color: AppColors.white,
+                      size: 48,
+                    )
+                  else
+                    const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(AppColors.white),
+                    ),
+                  AppSpacing.verticalSpaceSmall,
+                  CText(
+                    message,
+                    type: TextType.bodyMedium,
+                    color: AppColors.white,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Back button always available in loading state
+          Positioned(
+            top: 16,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+     return Container(
+        color: Colors.black,
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+            AppSpacing.verticalSpaceAverage,
+            CText(
+              _errorMessage ?? 'Unable to load video',
+              type: TextType.bodyMedium,
+              textAlign: TextAlign.center,
+              color: AppColors.white,
+            ),
+            AppSpacing.verticalSpaceLarge,
+            ElevatedButton.icon(
+              onPressed: _retry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Try again'),
+            ),
+             AppSpacing.verticalSpaceAverage,
+            TextButton(
+               onPressed: () => Navigator.of(context).pop(),
+               child: const Text('Go Back'),
+            ),
+             if (_activeUrl != null && _activeUrl!.isNotEmpty) ...[
+                AppSpacing.verticalSpaceLarge,
+                _DiagnosticsRow(label: 'Current URL', value: _activeUrl!),
+              ],
+          ],
+        ),
+      );
   }
 
   Future<void> _preparePlayback(
       {required bool forceRefresh, required String origin}) async {
+    // Block playback if video is still processing
+    if (widget.processingStatus != null && widget.processingStatus != 'ready') {
+      if (!mounted) return;
+      setState(() {
+        _isFetchingLink = false;
+        _errorMessage = null;
+      });
+      return;
+    }
+
     final int token = ++_loadToken;
     await _disposeControllers();
 
     setState(() {
       _isFetchingLink = true;
-      _isInitializingPlayer = false;
       _errorMessage = null;
+      _hasMarkedComplete = false;
     });
 
     try {
-      final _PlaybackSource? source = await _resolvePlaybackSource(
+      final _WatchLinkResult? linkResult = await _fetchSignedUrl(
         forceRefresh: forceRefresh,
         origin: origin,
-        token: token,
       );
+      
       if (!mounted || token != _loadToken) {
         return;
       }
 
-      if (source == null) {
+      if (linkResult == null || linkResult.url.isEmpty) {
         setState(() {
           _isFetchingLink = false;
           _errorMessage ??= 'Unable to obtain video link. Please retry.';
@@ -101,103 +270,152 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
         return;
       }
 
-      _probeLogs
-        ..clear()
-        ..addAll(source.probeLogs);
-
-      setState(() {
-        _isFetchingLink = false;
-        _isInitializingPlayer = true;
-        _activeUrl = source.url.toString();
-        _activeHeaders = source.headers;
-      });
-
-      final VideoPlayerController controller = _createVideoController(
-        source.url,
-        source.headers,
-      );
-      await controller.initialize();
-      if (!mounted || token != _loadToken) {
-        await controller.dispose();
+       final Uri? parsed = Uri.tryParse(linkResult.url);
+      if (parsed == null || !parsed.hasScheme) {
+         setState(() {
+           _isFetchingLink = false;
+          _errorMessage = 'Received an invalid playback URL.';
+        });
         return;
       }
 
-      final ChewieController chewie = _createChewieController(controller);
+      // Sanitize headers
+      final Map<String, String>? headers = _sanitizeHeaders(parsed, linkResult.headers);
+      
       setState(() {
-        _isInitializingPlayer = false;
-        _videoController = controller;
-        _chewieController = chewie;
-        _errorMessage = null;
+         _activeUrl = linkResult.url;
+         _activeHeaders = headers;
       });
-      _autoRefreshAttempts = 0;
+
+      debugPrint('Initializing VideoPlayerController for URL: ${linkResult.url}');
+
+      // Initialize VideoPlayerController
+      final videoController = VideoPlayerController.networkUrl(
+        parsed,
+        httpHeaders: headers ?? {}, 
+      );
+      
+      await videoController.initialize();
+      
+      if (!mounted || token != _loadToken) {
+        await videoController.dispose();
+        return;
+      }
+
+      // Prepare initial seek if needed
+      if (widget.startPositionSeconds != null && widget.startPositionSeconds! > 0) {
+        final duration = videoController.value.duration;
+        final seekTo = Duration(seconds: widget.startPositionSeconds!);
+        if (seekTo < duration) {
+           await videoController.seekTo(seekTo);
+        }
+      }
+
+      // Initialize ChewieController
+      final chewieController = ChewieController(
+        videoPlayerController: videoController,
+        autoPlay: true,
+        looping: false,
+        aspectRatio: videoController.value.aspectRatio, // Use video's aspect ratio
+        errorBuilder: (context, errorMessage) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            );
+        },
+        allowedScreenSleep: false,
+        fullScreenByDefault: false,
+      );
+
+      setState(() {
+        _isFetchingLink = false;
+        _videoPlayerController = videoController;
+        _chewieController = chewieController;
+        _autoRefreshAttempts = 0;
+      });
+      
+      // Listen for errors on the video controller
+      videoController.addListener(() {
+          if (videoController.value.hasError) {
+             _handleVideoError(videoController.value.errorDescription, token);
+          }
+          final val = videoController.value;
+          
+          // Debug logs for playback progress (throttle these in real app, but useful for debug now)
+          // debugPrint('Playback: ${val.position} / ${val.duration} | Playing: ${val.isPlaying} | Complete: $_hasMarkedComplete');
+
+          if (val.isInitialized &&
+              !val.isPlaying &&
+              val.duration != Duration.zero &&
+              (val.position >= val.duration || 
+               val.duration - val.position <= const Duration(milliseconds: 1000))) {
+             debugPrint('Video/Chewie detected end of playback. Pos: ${val.position}, Dur: ${val.duration}');
+            _handleVideoComplete(token);
+          }
+      });
+
     } catch (error, stackTrace) {
       debugPrint('Video prepare failed ($origin): $error\n$stackTrace');
       if (!mounted || token != _loadToken) {
         return;
       }
+      _handleVideoError(error, token);
+    }
+  }
+
+  void _handleVideoError(Object? error, int token) async {
+      if (!mounted || token != _loadToken) return;
 
       final String message = _describeError(error);
-      setState(() {
-        _isFetchingLink = false;
-        _isInitializingPlayer = false;
-        _errorMessage = message;
-      });
+      
+      // If header is already showing error, don't continually setState unless logic requires it
+      if (_errorMessage != message) {
+          setState(() {
+            _isFetchingLink = false;
+            _errorMessage = message;
+            // Dispose bad controllers to prevent further errors
+            _chewieController?.dispose();
+            _chewieController = null;
+          });
+      }
 
       if (_shouldAttemptSignedUrlRefresh(error) &&
           _canRefreshSignedUrl &&
           _autoRefreshAttempts < 1) {
         _autoRefreshAttempts += 1;
-        await Future<void>.delayed(const Duration(milliseconds: 300));
+        debugPrint('Attempting auto-refresh due to forbidden/expired error...');
+        await Future<void>.delayed(const Duration(milliseconds: 500));
         if (mounted) {
           await _preparePlayback(
               forceRefresh: true, origin: 'auto refresh after forbidden');
         }
       }
-    }
   }
 
-  Future<_PlaybackSource?> _resolvePlaybackSource({
-    required bool forceRefresh,
-    required String origin,
-    required int token,
-  }) async {
-    try {
-      final _WatchLinkResult? watchLink = await _fetchSignedUrl(
-        forceRefresh: forceRefresh,
-        origin: origin,
-      );
-      if (!mounted || token != _loadToken) {
-        return null;
-      }
+  void _handleVideoComplete(int token) async {
+    if (_hasMarkedComplete) return;
+    if (!mounted || token != _loadToken) return;
 
-      if (watchLink == null || watchLink.url.isEmpty) {
-        setState(() {
-          _errorMessage = 'Server did not return a playback URL.';
-        });
-        return null;
-      }
+    _hasMarkedComplete = true; // prevent double firing
 
-      final Uri? parsed = Uri.tryParse(watchLink.url);
-      if (parsed == null || !parsed.hasScheme) {
-        setState(() {
-          _errorMessage = 'Received an invalid playback URL.';
-        });
-        return null;
-      }
-
-      final Map<String, String>? headers =
-          _sanitizeHeaders(parsed, watchLink.headers);
-      final List<_ProbeLog> probeLogs = await _probeStream(parsed, headers);
-
-      return _PlaybackSource(
-          url: parsed, headers: headers, probeLogs: probeLogs);
-    } catch (error, stackTrace) {
-      debugPrint(
-          'Playback source resolution failed ($origin): $error\n$stackTrace');
-      setState(() {
-        _errorMessage = 'Failed to prepare playback. ${_describeError(error)}';
+    final String? lectureId = widget.lectureId?.trim();
+    if (lectureId != null && lectureId.isNotEmpty) {
+      debugPrint('Video completed. Marking lecture $lectureId as complete.');
+      final courseService = ref.read(courseServiceProvider);
+      // Fire-and-forget the completion call
+      courseService.completeLecture(lectureId).then((result) {
+        if (result.isLeft) {
+          debugPrint('Failed to mark lecture complete: ${result.left.message}');
+        } else {
+          debugPrint('Lecture $lectureId marked complete successfully.');
+        }
       });
-      return null;
     }
   }
 
@@ -269,7 +487,7 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     });
     return null;
   }
-
+  
   String? _extractUrlFromPayload(Map<String, dynamic> payload) {
     const candidates = <String>[
       'url',
@@ -286,6 +504,23 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     }
     return null;
   }
+
+  Future<void> _disposeControllers() async {
+    try {
+      _chewieController?.dispose();
+    } catch (_) {}
+    try {
+      await _videoPlayerController?.dispose();
+    } catch(_) {}
+    _chewieController = null;
+    _videoPlayerController = null;
+  }
+  
+  Future<void> _retry() async {
+    await _preparePlayback(forceRefresh: true, origin: 'user retry');
+  }
+
+  // --- Helpers similar to previous implementation ---
 
   Map<String, String>? _sanitizeHeaders(Uri uri, Map<String, String>? source) {
     if (source == null || source.isEmpty) {
@@ -328,127 +563,12 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
         .any((key) => signedQueryHints.contains(key.toLowerCase()));
   }
 
-  Future<List<_ProbeLog>> _probeStream(
-      Uri uri, Map<String, String>? headers) async {
-    final logs = <_ProbeLog>[];
-    final options = BaseOptions(
-      connectTimeout: const Duration(seconds: 8),
-      receiveTimeout: const Duration(seconds: 8),
-      followRedirects: true,
-      validateStatus: (_) => true,
-    );
-    final dio = Dio(options);
-
-    Future<void> record(
-        String method, Future<Response<dynamic>> Function() request) async {
-      final stopwatch = Stopwatch()..start();
-      try {
-        final response = await request();
-        stopwatch.stop();
-        logs.add(_ProbeLog(
-          method: method,
-          statusCode: response.statusCode,
-          message: response.statusMessage,
-          duration: stopwatch.elapsed,
-          finalUri: response.realUri,
-        ));
-      } on DioException catch (error) {
-        stopwatch.stop();
-        logs.add(_ProbeLog(
-          method: method,
-          statusCode: error.response?.statusCode,
-          message: error.message ?? error.error?.toString(),
-          duration: stopwatch.elapsed,
-          finalUri: error.response?.realUri,
-          errorType: error.type.toString(),
-        ));
-      } catch (error) {
-        stopwatch.stop();
-        logs.add(_ProbeLog(
-          method: method,
-          message: error.toString(),
-          duration: stopwatch.elapsed,
-        ));
-      }
-    }
-
-    await record(
-      'HEAD',
-      () => dio.requestUri<void>(
-        uri,
-        options: Options(
-            method: 'HEAD', headers: headers, responseType: ResponseType.plain),
-      ),
-    );
-
-    final _ProbeLog? first = logs.isEmpty ? null : logs.first;
-    if (first == null ||
-        (first.statusCode != null && first.statusCode! >= 400)) {
-      await record(
-        'GET range',
-        () => dio.requestUri<List<int>>(
-          uri,
-          options: Options(
-            method: 'GET',
-            headers: <String, String>{
-              if (headers != null) ...headers,
-              'Range': 'bytes=0-0',
-            },
-            responseType: ResponseType.bytes,
-          ),
-        ),
-      );
-    }
-
-    dio.close(force: true);
-    return logs;
-  }
-
-  VideoPlayerController _createVideoController(
-      Uri uri, Map<String, String>? headers) {
-    if (headers == null || headers.isEmpty) {
-      return VideoPlayerController.networkUrl(uri);
-    }
-    return VideoPlayerController.networkUrl(uri, httpHeaders: headers);
-  }
-
-  ChewieController _createChewieController(VideoPlayerController controller) {
-    return ChewieController(
-      videoPlayerController: controller,
-      autoPlay: true,
-      looping: false,
-      showControlsOnInitialize: false,
-      allowPlaybackSpeedChanging: true,
-      allowedScreenSleep: false,
-      materialProgressColors: ChewieProgressColors(
-        handleColor: AppColors.primary,
-        backgroundColor: AppColors.gray300,
-        bufferedColor: AppColors.gray400,
-        playedColor: AppColors.secondary,
-      ),
-      errorBuilder: (context, message) {
-        final fallback = message.isNotEmpty
-            ? message
-            : 'Playback error encountered. Please try again.';
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: CText(
-              fallback,
-              type: TextType.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  bool get _canRefreshSignedUrl =>
+   bool get _canRefreshSignedUrl =>
       widget.getWatchUrl != null ||
       (widget.lectureId != null && widget.lectureId!.trim().isNotEmpty);
 
-  bool _shouldAttemptSignedUrlRefresh(Object error) {
+  bool _shouldAttemptSignedUrlRefresh(Object? error) {
+    if (error == null) return false;
     final message = error.toString().toLowerCase();
     if (message.contains('403') || message.contains('forbidden')) {
       return true;
@@ -459,7 +579,8 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     return false;
   }
 
-  String _describeError(Object error) {
+  String _describeError(Object? error) {
+    if (error == null) return 'Unknown error occurred';
     final text = error.toString();
     if (text.contains('403')) {
       return 'Streaming endpoint responded with status 403 (forbidden). Tap retry to request a fresh signed link.';
@@ -473,202 +594,14 @@ class _VideoPlayerPageState extends ConsumerState<VideoPlayerPage> {
     return text;
   }
 
-  Future<void> _retry() async {
-    await _preparePlayback(forceRefresh: true, origin: 'user retry');
-  }
-
-  Future<void> _copyDiagnostics() async {
-    final buffer = StringBuffer()
-      ..writeln('Playback diagnostics')
-      ..writeln('-------------------');
-
-    if (_activeUrl != null) {
-      buffer.writeln('Active URL: $_activeUrl');
-    }
-
-    if (_activeHeaders != null && _activeHeaders!.isNotEmpty) {
-      buffer.writeln('Headers:');
-      _activeHeaders!.forEach((key, value) => buffer.writeln('  $key: $value'));
-    }
-
-    if (_probeLogs.isNotEmpty) {
-      buffer.writeln('Probe results:');
-      for (final log in _probeLogs) {
-        buffer.writeln('  ${log.summary()}');
-      }
-    }
-
-    if (_errorMessage != null) {
-      buffer.writeln('Last error: $_errorMessage');
-    }
-
-    final text = buffer.toString();
-    if (text.trim().isEmpty) {
-      return;
-    }
-    await Clipboard.setData(ClipboardData(text: text));
-    if (!mounted) {
-      return;
-    }
-    AppMethods.showCustomSnackBar(
-      context: context,
-      message: 'Diagnostics copied to clipboard',
-    );
-  }
-
-  Future<void> _disposeControllers() async {
-    final ChewieController? chewie = _chewieController;
-    final VideoPlayerController? controller = _videoController;
-    _chewieController = null;
-    _videoController = null;
-
-    if (chewie != null) {
-      chewie.dispose();
-    }
-    if (controller != null) {
-      await controller.dispose();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final chewie = _chewieController;
-    return Scaffold(
-      appBar: AppBar(
-        title: CText(widget.title ?? 'Lecture', type: TextType.titleMedium),
-        actions: [
-          if (!_isLoading)
-            IconButton(
-              tooltip: 'Reload',
-              onPressed: _retry,
-              icon: const Icon(Icons.refresh),
-            ),
-          if (_probeLogs.isNotEmpty || _errorMessage != null)
-            IconButton(
-              tooltip: 'Copy diagnostics',
-              onPressed: _copyDiagnostics,
-              icon: const Icon(Icons.content_copy),
-            ),
-        ],
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        child: _isLoading
-            ? _buildLoading()
-            : chewie != null
-                ? _buildPlayer(chewie)
-                : _buildErrorState(),
-      ),
-    );
-  }
-
-  Widget _buildPlayer(ChewieController chewie) {
-    return SafeArea(
-      child: Container(
-        color: Colors.black,
-        alignment: Alignment.center,
-        child: Chewie(controller: chewie),
-      ),
-    );
-  }
-
-  Widget _buildLoading() {
-    final String message =
-        _isFetchingLink ? 'Requesting video link...' : 'Preparing player...';
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            AppSpacing.verticalSpaceSmall,
-            CText(message, type: TextType.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorState() {
-    final diagnosticsCards = _probeLogs
-        .map((log) => _DiagnosticsCard(
-              title: log.method,
-              details: log.summary(),
-            ))
-        .toList();
-
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CText(
-              _errorMessage ?? 'Unable to load video',
-              type: TextType.bodyMedium,
-              textAlign: TextAlign.center,
-            ),
-            AppSpacing.verticalSpaceAverage,
-            ElevatedButton.icon(
-              onPressed: _retry,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
-            ),
-            if (_activeUrl != null && _activeUrl!.isNotEmpty) ...[
-              AppSpacing.verticalSpaceLarge,
-              _DiagnosticsRow(label: 'Current URL', value: _activeUrl!),
-            ],
-            if (_activeHeaders != null && _activeHeaders!.isNotEmpty) ...[
-              AppSpacing.verticalSpaceSmall,
-              _DiagnosticsRow(
-                label: 'Applied headers',
-                value: _activeHeaders!.entries
-                    .map((entry) => '${entry.key}: ${entry.value}')
-                    .join('\n'),
-              ),
-            ],
-            if (diagnosticsCards.isNotEmpty) ...[
-              AppSpacing.verticalSpaceLarge,
-              CText(
-                'Probe attempts',
-                type: TextType.bodySmall,
-                color: AppColors.gray600,
-              ),
-              AppSpacing.verticalSpaceSmall,
-              ...diagnosticsCards,
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
   bool _mapEquals(Map<String, String>? a, Map<String, String>? b) {
-    if (a == null && b == null) {
-      return true;
-    }
-    if (a == null || b == null || a.length != b.length) {
-      return false;
-    }
+    if (a == null && b == null) return true;
+    if (a == null || b == null || a.length != b.length) return false;
     for (final key in a.keys) {
-      if (a[key] != b[key]) {
-        return false;
-      }
+      if (a[key] != b[key]) return false;
     }
     return true;
   }
-}
-
-class _PlaybackSource {
-  _PlaybackSource({
-    required this.url,
-    required this.headers,
-    required this.probeLogs,
-  });
-
-  final Uri url;
-  final Map<String, String>? headers;
-  final List<_ProbeLog> probeLogs;
 }
 
 class _WatchLinkResult {
@@ -679,44 +612,6 @@ class _WatchLinkResult {
 
   final String url;
   final Map<String, String>? headers;
-}
-
-class _ProbeLog {
-  _ProbeLog({
-    required this.method,
-    this.statusCode,
-    this.message,
-    this.duration,
-    this.finalUri,
-    this.errorType,
-  });
-
-  final String method;
-  final int? statusCode;
-  final String? message;
-  final Duration? duration;
-  final Uri? finalUri;
-  final String? errorType;
-
-  String summary() {
-    final buffer = StringBuffer()..write(method);
-    if (statusCode != null) {
-      buffer.write(' -> $statusCode');
-    }
-    if (message != null && message!.isNotEmpty) {
-      buffer.write(' ($message)');
-    }
-    if (duration != null) {
-      buffer.write(' in ${duration!.inMilliseconds} ms');
-    }
-    if (finalUri != null && finalUri.toString() != finalUri!.origin) {
-      buffer.write(' -> ${finalUri.toString()}');
-    }
-    if (errorType != null) {
-      buffer.write(' [$errorType]');
-    }
-    return buffer.toString();
-  }
 }
 
 class _DiagnosticsRow extends StatelessWidget {
@@ -735,47 +630,15 @@ class _DiagnosticsRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CText(label, type: TextType.bodySmall, color: AppColors.gray600),
+          CText(label, type: TextType.bodySmall, color: AppColors.gray400),
           AppSpacing.verticalSpaceSmall,
           SelectableText(
             value,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.gray300,
+                ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _DiagnosticsCard extends StatelessWidget {
-  const _DiagnosticsCard({
-    required this.title,
-    required this.details,
-  });
-
-  final String title;
-  final String details;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SelectableText(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            AppSpacing.verticalSpaceSmall,
-            SelectableText(details,
-                style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
       ),
     );
   }

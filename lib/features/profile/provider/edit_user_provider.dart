@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:scholarsgyanacademy/features/auth/model/auth_models.dart';
+
+import '../../auth/model/auth_models.dart';
 
 final editCtrlProvider = ChangeNotifierProvider<EditCtrl>(
   (Ref ref) => EditCtrl(),

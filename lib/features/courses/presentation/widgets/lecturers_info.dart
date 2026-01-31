@@ -11,6 +11,10 @@ class LecturersInfo extends ConsumerWidget {
     final state = ref.watch(coursesViewModelProvider);
     final lecturers = state.lecturers;
 
+    if (!state.isEnrolled) {
+      return const Center(child: CText('Enroll to access lecturers'));
+    }
+
     if (state.loadingLecturers && lecturers.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }

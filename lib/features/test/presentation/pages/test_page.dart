@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 
 import '../../../../core/core.dart';
 import '../../../explore/explore.dart';
@@ -13,6 +13,7 @@ import '../widgets/mock_test_list.dart';
 import '../widgets/test_history.dart';
 import 'detail_pages/quiz_page.dart';
 import 'detail_pages/test_details.dart';
+import 'detail_pages/result_page.dart';
 import 'detail_pages/select_course.dart';
 
 final selectedTabIndexProvider = StateProvider<int>((Ref ref) => 0);
@@ -160,9 +161,8 @@ class _TestPageState extends ConsumerState<TestPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => QuizPage(
-                            sessionId: historyItem.sessionId,
-                            readOnly: true,
+                          builder: (context) => const ResultPage(
+                            showDoneButton: false,
                           ),
                         ),
                       );

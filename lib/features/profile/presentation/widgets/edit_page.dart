@@ -1,13 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:scholarsgyanacademy/features/auth/model/auth_models.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../../../../core/core.dart';
+import '../../../auth/model/auth_models.dart';
 import '../../../auth/view_model/auth_state.dart';
 import '../../../auth/view_model/providers/auth_providers.dart';
 import '../../profile.dart';
@@ -105,48 +104,48 @@ class _EditPageState extends ConsumerState<EditPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: CustomAppBar(title: ' Edit Profile'),
+      appBar: CustomAppBar(
+        title: ' Edit Profile',
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             Stack(
               children: [
-                Builder(
-                  builder: (context) {
-                    final ctrl = ref.watch(editCtrlProvider);
-                    // If user just picked an image, show the picked local file
-                    if (ctrl.pickedImagePath != null &&
-                        ctrl.pickedImagePath!.isNotEmpty) {
-                      return CircleAvatar(
-                        backgroundImage: FileImage(File(ctrl.pickedImagePath!)),
-                        radius: 50,
-                      );
-                    }
-
-                    // Else if auth user has a photo URL, use NetworkImage
-                    final authState = ref.watch(authNotifierProvider);
-                    final rawPhoto = authState.user?.photo;
-                    String? photoUrl;
-                    if (rawPhoto is Map<String, dynamic>) {
-                      final candidate = rawPhoto['path'] ?? rawPhoto['url'];
-                      if (candidate is String && candidate.isNotEmpty)
-                        photoUrl = candidate;
-                    }
-
-                    if (photoUrl != null && photoUrl.isNotEmpty) {
-                      return CircleAvatar(
-                        backgroundImage: NetworkImage(photoUrl),
-                        radius: 50,
-                      );
-                    }
-
+                Builder(builder: (context) {
+                  final ctrl = ref.watch(editCtrlProvider);
+                  // If user just picked an image, show the picked local file
+                  if (ctrl.pickedImagePath != null &&
+                      ctrl.pickedImagePath!.isNotEmpty) {
                     return CircleAvatar(
-                      backgroundImage: AssetImage(AppAssets.loginBg),
+                      backgroundImage: FileImage(File(ctrl.pickedImagePath!)),
                       radius: 50,
                     );
-                  },
-                ),
+                  }
+
+                  // Else if auth user has a photo URL, use NetworkImage
+                  final authState = ref.watch(authNotifierProvider);
+                  final rawPhoto = authState.user?.photo;
+                  String? photoUrl;
+                  if (rawPhoto is Map<String, dynamic>) {
+                    final candidate = rawPhoto['path'] ?? rawPhoto['url'];
+                    if (candidate is String && candidate.isNotEmpty)
+                      photoUrl = candidate;
+                  }
+
+                  if (photoUrl != null && photoUrl.isNotEmpty) {
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(photoUrl),
+                      radius: 50,
+                    );
+                  }
+
+                  return CircleAvatar(
+                    backgroundImage: AssetImage(AppAssets.loginBg),
+                    radius: 50,
+                  );
+                }),
                 Positioned(
                   right: 2,
                   bottom: 2,
@@ -196,15 +195,14 @@ class _EditPageState extends ConsumerState<EditPage> {
                                 '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_${picked.name}';
                             final compressedBytes =
                                 await FlutterImageCompress.compressWithFile(
-                                  picked.path,
-                                  quality: 70,
-                                  rotate: 0,
-                                );
+                              picked.path,
+                              quality: 70,
+                              rotate: 0,
+                            );
                             if (compressedBytes != null &&
                                 compressedBytes.isNotEmpty) {
-                              final compressedFile = await File(
-                                targetPath,
-                              ).writeAsBytes(compressedBytes);
+                              final compressedFile = await File(targetPath)
+                                  .writeAsBytes(compressedBytes);
                               await ref
                                   .read(authNotifierProvider.notifier)
                                   .uploadProfilePicture(compressedFile);

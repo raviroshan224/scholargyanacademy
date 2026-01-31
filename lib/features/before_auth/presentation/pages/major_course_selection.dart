@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:scholarsgyanacademy/features/dashboard/presentation/pages/dashboard.dart';
 
 import '../../../../core/core.dart';
+import '../../../dashboard/presentation/pages/dashboard.dart';
 
 class MajorCourseSelection extends StatelessWidget {
   const MajorCourseSelection({super.key});

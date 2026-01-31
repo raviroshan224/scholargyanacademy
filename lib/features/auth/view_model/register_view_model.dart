@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/auth/model/register_request.dart';
-import 'package:scholarsgyanacademy/features/auth/view/pages/email_verification_page.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
 import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
+
+import '../../../core/methods/app_methods.dart';
+import '../model/register_request.dart';
+import '../view/pages/email_verification_page.dart';
+import 'auth_state.dart';
 
 final registerViewModelProvider = Provider<RegisterViewModel>((Ref ref) {
   return RegisterViewModel(ref);

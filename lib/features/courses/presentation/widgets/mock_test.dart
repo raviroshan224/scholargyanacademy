@@ -25,6 +25,10 @@ class MockTestList extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+    if (!isEnrolled) {
+      return const Center(child: CText('Enroll to access mock tests'));
+    }
+
     if (state.mockTestsError != null && tests.isEmpty) {
       return Center(
         child: Padding(

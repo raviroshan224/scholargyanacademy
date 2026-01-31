@@ -547,7 +547,9 @@ class TestHistoryItem {
   const TestHistoryItem({
     required this.sessionId,
     this.mockTestId,
+    this.mockTestTitle,
     this.examTitle,
+    this.courseId,
     this.score,
     this.percentage,
     this.correct,
@@ -556,11 +558,16 @@ class TestHistoryItem {
     this.totalQuestions,
     this.completedAt,
     this.durationMinutes,
+    this.passed,
+    this.attemptNumber,
+    this.status,
   });
 
   final String sessionId;
   final String? mockTestId;
+  final String? mockTestTitle;
   final String? examTitle;
+  final String? courseId;
   final double? score;
   final double? percentage;
   final int? correct;
@@ -569,14 +576,21 @@ class TestHistoryItem {
   final int? totalQuestions;
   final DateTime? completedAt;
   final int? durationMinutes;
+  final bool? passed;
+  final int? attemptNumber;
+  final String? status;
 
   factory TestHistoryItem.fromJson(Map<String, dynamic> json) {
     return TestHistoryItem(
       sessionId: _string(json['sessionId'] ?? json['id'] ?? json['_id']) ?? '',
-      mockTestId: _string(json['mockTestId'] ?? json['mock_test_id']),
+      mockTestId:
+          _string(json['mockTestId'] ?? json['mock_test_id'] ?? json['testId']),
+      mockTestTitle: _string(json['mockTestTitle'] ?? json['testTitle']),
       examTitle: _string(json['examTitle'] ?? json['title'] ?? json['name']),
+      courseId: _string(json['courseId']),
       score: _double(json['score'] ?? json['marksObtained']),
-      percentage: _double(json['percentage'] ?? json['percent']),
+      percentage: _double(
+          json['scorePercentage'] ?? json['percentage'] ?? json['percent']),
       correct: _int(json['correct'] ?? json['correctAnswers']),
       incorrect: _int(json['incorrect'] ?? json['wrongAnswers']),
       attempted: _int(json['attempted'] ?? json['attemptedQuestions']),
@@ -586,6 +600,47 @@ class TestHistoryItem {
           json['completedAt'] ?? json['completed_at'] ?? json['date']),
       durationMinutes: _int(
           json['durationMinutes'] ?? json['duration'] ?? json['timeTaken']),
+      passed: _toBool(json['passed']),
+      attemptNumber: _int(json['attemptNumber']),
+      status: _string(json['status']),
+    );
+  }
+
+  TestHistoryItem copyWith({
+    String? sessionId,
+    String? mockTestId,
+    String? mockTestTitle,
+    String? examTitle,
+    String? courseId,
+    double? score,
+    double? percentage,
+    int? correct,
+    int? incorrect,
+    int? attempted,
+    int? totalQuestions,
+    DateTime? completedAt,
+    int? durationMinutes,
+    bool? passed,
+    int? attemptNumber,
+    String? status,
+  }) {
+    return TestHistoryItem(
+      sessionId: sessionId ?? this.sessionId,
+      mockTestId: mockTestId ?? this.mockTestId,
+      mockTestTitle: mockTestTitle ?? this.mockTestTitle,
+      examTitle: examTitle ?? this.examTitle,
+      courseId: courseId ?? this.courseId,
+      score: score ?? this.score,
+      percentage: percentage ?? this.percentage,
+      correct: correct ?? this.correct,
+      incorrect: incorrect ?? this.incorrect,
+      attempted: attempted ?? this.attempted,
+      totalQuestions: totalQuestions ?? this.totalQuestions,
+      completedAt: completedAt ?? this.completedAt,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
+      passed: passed ?? this.passed,
+      attemptNumber: attemptNumber ?? this.attemptNumber,
+      status: status ?? this.status,
     );
   }
 }

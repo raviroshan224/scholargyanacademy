@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:scholarsgyanacademy/features/auth/auth.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../../core/core.dart';
+import '../../../auth/view/pages/login_page.dart';
 import '../../before_auth.dart';
 
 class OnBoardingPage extends StatefulWidget {

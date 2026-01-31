@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:scholarsgyanacademy/features/courses/view_model/live_class_join_view_model.dart';
 
 import '../../../../core/core.dart';
 import '../../model/live_class_models.dart';
 import '../../view_model/course_view_model.dart';
-
+import '../../view_model/live_class_join_view_model.dart';
+import '../pages/meeting_page_v2.dart'; // ✅ NEW: Production-grade meeting UI
 
 class OngoingClassList extends ConsumerStatefulWidget {
   const OngoingClassList({super.key});
@@ -57,45 +57,7 @@ class _OngoingClassListState extends ConsumerState<OngoingClassList> {
     final isLoading = state.loadingLiveClasses;
     final failure = state.liveClassesError;
 
-    // CRITICAL: Listen for join state changes and navigate to MeetingPage
-    ref.listen<LiveClassJoinState>(liveClassJoinViewModelProvider, (
-      previous,
-      next,
-    ) {
-      debugPrint(
-        '🔍 [OngoingClass Listener] State: ${previous?.status} -> ${next.status}',
-      );
-      debugPrint(
-        '🔍 [OngoingClass Listener] Token: ${next.token != null ? "present" : "null"}',
-      );
-      debugPrint(
-        '🔍 [OngoingClass Listener] ProcessingClassId: ${next.processingClassId}',
-      );
-
-      if (!mounted) return;
-
-      // Navigate to MeetingPage when joining starts
-      if (next.status == LiveClassJoinStatus.joining &&
-          previous?.status != LiveClassJoinStatus.joining &&
-          next.token != null) {
-        
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Live classes are currently unavailable in this version.')),
-          );
-      }
-
-      // Handle join failure
-      if (next.status == LiveClassJoinStatus.failure &&
-          previous?.status != LiveClassJoinStatus.failure) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage ?? 'Failed to join live class'),
-            backgroundColor: AppColors.failure,
-            duration: const Duration(seconds: 4),
-          ),
-        );
-      }
-    });
+    // Listener removed in favor of direct await in button callback
 
     Widget buildContent() {
       if (isLoading && classes.isEmpty) {
@@ -166,10 +128,37 @@ class _OngoingClassListState extends ConsumerState<OngoingClassList> {
           final item = classes[index];
           return _LiveClassCard(
             liveClass: item,
-            onJoin: () {
-              ref
-                  .read(liveClassJoinViewModelProvider.notifier)
-                  .joinLiveClass(item.id);
+            onJoin: () async {
+              final notifier = ref.read(
+                liveClassJoinViewModelProvider.notifier,
+              );
+              final token = await notifier.joinLiveClass(item.id);
+
+              if (token != null && context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        MeetingPageV2(token: token, classId: item.id),
+                  ),
+                ).then((_) {
+                  notifier.reset();
+                });
+              } else if (context.mounted) {
+                // Check if there's an error in state to show snackbar
+                final state = ref.read(liveClassJoinViewModelProvider);
+                if (state.status == LiveClassJoinStatus.failure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        state.errorMessage ?? 'Failed to join live class',
+                      ),
+                      backgroundColor: AppColors.failure,
+                      duration: const Duration(seconds: 4),
+                    ),
+                  );
+                }
+              }
             },
           );
         },

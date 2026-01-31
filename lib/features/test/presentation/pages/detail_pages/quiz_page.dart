@@ -192,6 +192,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                         question.prompt,
                         type: TextType.bodyMedium,
                         color: AppColors.black,
+                        maxLines: 10,
                       ),
                     if (question.description != null &&
                         question.description!.isNotEmpty) ...[
@@ -200,6 +201,7 @@ class _QuizPageState extends ConsumerState<QuizPage> {
                         question.description!,
                         type: TextType.bodySmall,
                         color: AppColors.gray700,
+                        maxLines: 10,
                       ),
                     ],
                     AppSpacing.verticalSpaceAverage,

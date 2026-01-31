@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/legacy.dart';
 
+
 import '../../../config/services/remote_services/errors/failure.dart';
+import '../../courses/model/live_class_models.dart';
+import '../../courses/service/live_class_service.dart';
 import '../models/homepage_models.dart';
 import '../service/homepage_service.dart';
 
@@ -12,6 +15,9 @@ class HomepageState {
     this.updatingCategory = false,
     this.updateError,
     this.latestSelectedCategoryId,
+    this.upcomingLiveClasses = const <LiveClassModel>[],
+    this.isUpcomingLiveClassesLoading = false,
+    this.upcomingLiveClassesError,
   });
 
   final bool loading;
@@ -20,11 +26,15 @@ class HomepageState {
   final bool updatingCategory;
   final Failure? updateError;
   final String? latestSelectedCategoryId;
+  final List<LiveClassModel> upcomingLiveClasses;
+  final bool isUpcomingLiveClassesLoading;
+  final Failure? upcomingLiveClassesError;
 
   List<Category> get preferredCategories =>
       data?.preferredCategories ?? const <Category>[];
   List<Course> get recommendedCourses =>
       data?.recommendedCourses ?? const <Course>[];
+  List<Course> get bannerCourses => data?.bannerCourses ?? const <Course>[];
   List<Exam> get recommendedExams => data?.recommendedExams ?? const <Exam>[];
   LatestOngoingCourse? get latestOngoingCourse => data?.latestOngoingCourse;
   List<LiveClass> get liveClasses => data?.liveClasses ?? const <LiveClass>[];
@@ -46,6 +56,10 @@ class HomepageState {
     bool clearUpdateError = false,
     String? latestSelectedCategoryId,
     bool setLatestSelectedCategoryId = false,
+    List<LiveClassModel>? upcomingLiveClasses,
+    bool? isUpcomingLiveClassesLoading,
+    Failure? upcomingLiveClassesError,
+    bool clearUpcomingLiveClassesError = false,
   }) {
     return HomepageState(
       loading: loading ?? this.loading,
@@ -56,14 +70,22 @@ class HomepageState {
       latestSelectedCategoryId: setLatestSelectedCategoryId
           ? latestSelectedCategoryId
           : (latestSelectedCategoryId ?? this.latestSelectedCategoryId),
+      upcomingLiveClasses: upcomingLiveClasses ?? this.upcomingLiveClasses,
+      isUpcomingLiveClassesLoading:
+          isUpcomingLiveClassesLoading ?? this.isUpcomingLiveClassesLoading,
+      upcomingLiveClassesError: clearUpcomingLiveClassesError
+          ? null
+          : (upcomingLiveClassesError ?? this.upcomingLiveClassesError),
     );
   }
 }
 
 class HomepageViewModel extends StateNotifier<HomepageState> {
-  HomepageViewModel(this._service) : super(const HomepageState());
+  HomepageViewModel(this._service, this._liveClassService)
+      : super(const HomepageState());
 
   final HomepageService _service;
+  final LiveClassService _liveClassService;
 
   Future<void> getHomepageData({bool forceRefresh = false}) async {
     if (state.loading && !forceRefresh) return;
@@ -76,17 +98,6 @@ class HomepageViewModel extends StateNotifier<HomepageState> {
         error: failure,
       ),
       (payload) {
-        // Debug: print raw homepage payload for load/reload visibility
-        // Using print so logs appear in debug console; replace with logger in production
-        try {
-          final user = payload.userProfile?.fullName ?? 'no-user';
-          final recCount = payload.recommendedCourses.length;
-          final prefCount = payload.preferredCategories.length;
-          print(
-              'Homepage payload loaded: user=$user recommended=$recCount preferred=$prefCount');
-        } catch (e) {
-          print('Homepage payload loaded (error reading fields): $e');
-        }
         final newLatestCategoryId = state.latestSelectedCategoryId ??
             payload.topCategoryWithCourses?.categoryId ??
             (payload.preferredCategories.isNotEmpty
@@ -101,6 +112,29 @@ class HomepageViewModel extends StateNotifier<HomepageState> {
         );
       },
     );
+
+    // Fetch upcoming live classes
+    if (result.isRight) {
+      state = state.copyWith(
+          isUpcomingLiveClassesLoading: true,
+          clearUpcomingLiveClassesError: true);
+      final upcomingResult = await _liveClassService.getMyClasses(
+        status: 'upcoming',
+        page: 1,
+        limit: 5,
+      );
+      state = upcomingResult.fold(
+        (failure) => state.copyWith(
+          isUpcomingLiveClassesLoading: false,
+          upcomingLiveClassesError: failure,
+        ),
+        (classes) => state.copyWith(
+          isUpcomingLiveClassesLoading: false,
+          upcomingLiveClasses: classes,
+          clearUpcomingLiveClassesError: true,
+        ),
+      );
+    }
   }
 
   Future<void> updateLatestCategory(String categoryId) async {
@@ -144,7 +178,8 @@ class HomepageViewModel extends StateNotifier<HomepageState> {
 final homepageViewModelProvider =
     StateNotifierProvider<HomepageViewModel, HomepageState>((ref) {
   final service = ref.read(homepageServiceProvider);
-  final notifier = HomepageViewModel(service);
+  final liveClassService = ref.read(liveClassServiceProvider);
+  final notifier = HomepageViewModel(service, liveClassService);
   notifier.getHomepageData();
   return notifier;
 });

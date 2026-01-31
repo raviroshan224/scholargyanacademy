@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/http_service_provider.dart';
-import 'package:scholarsgyanacademy/config/services/secure_storage_provider.dart';
-import 'package:scholarsgyanacademy/features/auth/service/auth_api.dart';
-import 'package:scholarsgyanacademy/features/auth/service/auth_service.dart';
-import 'package:scholarsgyanacademy/features/auth/service/user_service.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_view_model.dart';
+
+import '../../../../config/services/remote_services/http_service_provider.dart';
+import '../../../../config/services/secure_storage_provider.dart';
+import '../../service/auth_api.dart';
+import '../../service/auth_service.dart';
+import '../../service/user_service.dart';
+import '../auth_state.dart';
+import '../auth_view_model.dart';
 
 final authApiProvider = Provider<AuthApi>((Ref ref) {
   final httpService = ref.watch(httpServiceProvider);

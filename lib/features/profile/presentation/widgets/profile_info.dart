@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:scholarsgyanacademy/features/auth/model/auth_models.dart';
 
 import '../../../../core/core.dart';
+import '../../../auth/model/auth_models.dart';
 
 class ProfileInfo extends StatelessWidget {
   const ProfileInfo({
@@ -53,7 +53,10 @@ class ProfileInfo extends StatelessWidget {
       children: [
         Stack(
           children: [
-            CircleAvatar(backgroundImage: _resolveAvatar(), radius: 45),
+            CircleAvatar(
+              backgroundImage: _resolveAvatar(),
+              radius: 36,
+            ),
             Positioned(
               right: 2,
               bottom: 2,
@@ -103,7 +106,7 @@ class ProfileInfo extends StatelessWidget {
                     ),
                   ],
                 ),
-        ),
+        )
       ],
     );
   }

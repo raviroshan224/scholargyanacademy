@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinput/pinput.dart';
 import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/auth/view/pages/login_page.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/email_verification_view_model.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
+
+import '../../view_model/auth_state.dart';
+import '../../view_model/email_verification_view_model.dart';
+import '../../view_model/providers/auth_providers.dart';
+import 'login_page.dart';
 
 class EmailVerificationPage extends ConsumerStatefulWidget {
   const EmailVerificationPage({super.key, required this.email});

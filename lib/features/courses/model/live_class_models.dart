@@ -125,7 +125,10 @@ class LiveClassModel {
       description: map['description']?.toString(),
       status: map['status']?.toString(),
       startTime: parseDate(
-        map['startTime'] ?? map['startsAt'] ?? map['scheduledAt'],
+        map['startTime'] ??
+            map['startsAt'] ??
+            map['scheduledAt'] ??
+            map['scheduledDate'],
       ),
       endTime: parseDate(map['endTime'] ?? map['endsAt']),
       durationMinutes: parseInt(

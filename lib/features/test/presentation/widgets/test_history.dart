@@ -84,7 +84,7 @@ class TestHistory extends StatelessWidget {
             itemBuilder: (context, index) {
               final item = sessions[index];
               final percent = item.percentage != null
-                  ? '${item.percentage!.toStringAsFixed(1)} %'
+                  ? '${item.percentage!.toStringAsFixed(1)}%'
                   : item.score != null
                       ? '${item.score}'
                       : '-';
@@ -92,42 +92,82 @@ class TestHistory extends StatelessWidget {
                   ? _formatDateTime(item.completedAt!)
                   : 'Not available';
 
+              final isPassed = item.passed == true;
+              final statusColor = isPassed ? AppColors.success : AppColors.failure;
+              final statusText = isPassed ? 'Passed' : 'Failed';
+
               return InkWell(
                 onTap: () => onHistoryTap(item),
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      CustomCachedNetworkImage(
-                        imageUrl: AppAssets.dummyNetImg,
-                        size: Size(64, 64),
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: statusColor.withOpacity(0.3)),
+                        ),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CText(
+                              percent,
+                              type: TextType.titleSmall,
+                              color: statusColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            if (item.passed != null) ...[
+                              AppSpacing.verticalSpaceTiny,
+                              CText(
+                                statusText,
+                                type: TextType.bodySmall,
+                                fontSize: 10,
+                                color: statusColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
-                      AppSpacing.horizontalSpaceLarge,
+                      AppSpacing.horizontalSpaceMedium,
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CText(
-                              item.examTitle ?? 'Mock Test',
+                              item.mockTestTitle ?? item.examTitle ?? 'Mock Test',
                               type: TextType.bodyMedium,
                               color: AppColors.black,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
+                              fontWeight: FontWeight.w600,
                             ),
                             AppSpacing.verticalSpaceSmall,
-                            CText(
-                              completedAt,
-                              type: TextType.bodySmall,
-                              color: AppColors.gray600,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 14,
+                                  color: AppColors.gray600,
+                                ),
+                                AppSpacing.horizontalSpaceTiny,
+                                CText(
+                                  completedAt,
+                                  type: TextType.bodySmall,
+                                  color: AppColors.gray600,
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      AppSpacing.horizontalSpaceLarge,
-                      CText(
-                        percent,
-                        type: TextType.titleSmall,
-                        color: AppColors.primary,
+                      Icon(
+                        Icons.chevron_right,
+                        color: AppColors.gray400,
                       ),
                     ],
                   ),

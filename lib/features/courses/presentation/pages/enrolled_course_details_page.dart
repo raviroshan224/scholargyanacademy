@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
-import 'package:scholarsgyanacademy/features/courses/presentation/widgets/enroll_with_esewa_button.dart';
 
 import '../../../../core/core.dart';
 import '../../../explore/explore.dart';
 import '../../courses.dart';
 import '../../model/enrollment_models.dart';
+import '../../service/course_service.dart';
 import '../../view_model/course_view_model.dart';
+import '../widgets/enroll_with_esewa_button.dart';
 
 class EnrolledCourseDetailsPage extends ConsumerStatefulWidget {
   final String courseId;
@@ -34,7 +35,7 @@ class _EnrolledCourseDetailsPageState
     'Syllabus',
     'Materials',
     'Lectures',
-    'Classes',
+    'Live Classes',
     'Mock Tests',
     'Lecturers',
   ];
@@ -56,11 +57,8 @@ class _EnrolledCourseDetailsPageState
       _handleTabSelection(_tabController.index);
     });
     // Only fetch if details for this course are not already present
-    final currentDetails = ref.read(coursesViewModelProvider).details;
-    final currentCourseId =
-        (currentDetails != null ? currentDetails['course'] : null)
-            as Map<String, dynamic>?;
-    final alreadyLoadedId = currentCourseId?['id']?.toString();
+    final currentState = ref.read(coursesViewModelProvider);
+    final alreadyLoadedId = currentState.detailsCourseId;
     if (alreadyLoadedId != widget.courseId) {
       // use microtask to avoid calling provider synchronously during init
       Future.microtask(() {
@@ -104,6 +102,76 @@ class _EnrolledCourseDetailsPageState
         ? details['course'] as Map<String, dynamic>?
         : null;
     final isLoading = state.loadingDetails && details == null;
+
+    void _handleFreeEnrollment() async {
+      setState(() {
+        // We can use a local loading state variable for the button if needed,
+        // or just rely on the modal blocking interaction.
+        // For simplicity, we can show a loading dialog or just set a local state.
+      });
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final courseService = ref.read(courseServiceProvider);
+      final result = await courseService.enrollFreeCourse(widget.courseId);
+
+      if (!mounted) return;
+      Navigator.pop(context); // Dismiss loading dialog
+
+      result.fold(
+        (failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Enrollment failed: ${failure.message}'),
+              backgroundColor: AppColors.failure,
+            ),
+          );
+        },
+        (_) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle,
+                    color: AppColors.success,
+                    size: 64,
+                  ),
+                  AppSpacing.verticalSpaceMedium,
+                  const CText(
+                    'You’ve successfully enrolled in this course',
+                    type: TextType.titleMedium,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  ),
+                  AppSpacing.verticalSpaceMedium,
+                  ReusableButton(
+                    text: 'Done',
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      // Refresh details to update state to "enrolled"
+                      ref
+                          .read(coursesViewModelProvider.notifier)
+                          .getDetails(widget.courseId);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+
     final error = state.detailsError;
     final tags = course?['tags'] is List
         ? (course!['tags'] as List)
@@ -114,12 +182,65 @@ class _EnrolledCourseDetailsPageState
         : const <String>[];
 
     Widget buildHeader(Map<String, dynamic>? course) {
-      final title = course?['courseTitle']?.toString() ?? AppStrings.position;
+      // Handle null course data - show loading placeholder
+      if (course == null) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.gray200,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+              ),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 24,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: AppColors.gray200,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  AppSpacing.verticalSpaceMedium,
+                  Container(
+                    height: 16,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: AppColors.gray100,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }
 
-      final description =
-          course?['courseDescription']?.toString() ?? AppStrings.lorem;
-      final imageUrl =
-          course?['courseImageUrl']?.toString() ?? AppAssets.dummyNetImg;
+      final title = course['courseTitle']?.toString() ?? 'Course';
+
+      final description = course['courseDescription']?.toString() ?? '';
+
+      // Prioritize courseIconUrl for detail page, fallback to courseImageUrl, then placeholder
+      final courseIconUrl = course['courseIconUrl']?.toString();
+      final coverImageUrl = course['courseIconUrl']?.toString();
+      final courseImageUrl = course['courseImageUrl']?.toString();
+      final imageUrl = (courseImageUrl != null && courseImageUrl.isNotEmpty)
+          ? courseImageUrl
+          // : (courseImageUrl != null && courseImageUrl.isNotEmpty)
+          //     ? courseImageUrl
+          : AppAssets.dummyNetImg;
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,19 +291,19 @@ class _EnrolledCourseDetailsPageState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CText(title, type: TextType.headlineLarge),
+                CText(title, maxLines: 7, type: TextType.headlineLarge),
                 AppSpacing.verticalSpaceSmall,
                 // Duration with clock icon
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CText(
-                      'Duration: ${course?['durationHours'] ?? 80} Hours',
+                      'Duration: ${course?['durationHours'] != null && course!['durationHours'] != 0 ? course!['durationHours'] : 'N/A'} Hours',
                       type: TextType.bodyMedium,
                       color: AppColors.gray600,
                     ),
                     CText(
-                      'Expires In: ${course?['validityDays'] ?? 0} Days',
+                      'Expires In: ${course?['validityDays'] != null && course!['validityDays'] != 0 ? course!['validityDays'] : 'N/A'} Days',
                       type: TextType.bodyMedium,
                       color: AppColors.gray600,
                     ),
@@ -191,7 +312,7 @@ class _EnrolledCourseDetailsPageState
                 AppSpacing.verticalSpaceMedium,
                 ReadMoreText(
                   description,
-                  trimLines: 4,
+                  trimLines: 10,
                   trimMode: TrimMode.Line,
                   trimCollapsedText: 'See More...',
                   trimExpandedText: '...Read Less',
@@ -509,123 +630,144 @@ class _EnrolledCourseDetailsPageState
     // Build scaffold with refresh support and clearer error handling
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref
-              .read(coursesViewModelProvider.notifier)
-              .getDetails(widget.courseId);
-        },
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: [
-            buildHeader(course),
-            // buildEnrollmentOverview(enrollmentModel),
-            if (course != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 12.0,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // Refresh course details
+            await ref
+                .read(coursesViewModelProvider.notifier)
+                .getDetails(widget.courseId);
+            // Also refresh the currently active tab's data
+            _refreshCurrentTab();
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              buildHeader(course),
+              // buildEnrollmentOverview(enrollmentModel),
+              if (course != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 12.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // buildHighlights(state, course),
+                      // if (tags.isNotEmpty) ...[
+                      //   AppSpacing.verticalSpaceMedium,
+                      //   CText('Tags', type: TextType.titleSmall),
+                      //   AppSpacing.verticalSpaceSmall,
+                      //   Wrap(
+                      //     spacing: 8,
+                      //     runSpacing: 8,
+                      //     children: [
+                      //       for (final tag in tags)
+                      //         Chip(
+                      //           label: CText(
+                      //             tag,
+                      //             type: TextType.bodySmall,
+                      //             color: AppColors.gray800,
+                      //           ),
+                      //           backgroundColor: AppColors.gray200,
+                      //           materialTapTargetSize:
+                      //               MaterialTapTargetSize.shrinkWrap,
+                      //           padding:
+                      //               const EdgeInsets.symmetric(horizontal: 4),
+                      //         ),
+                      //     ],
+                      //   ),
+                      //   AppSpacing.verticalSpaceMedium,
+                      // ],
+                      // AppSpacing.verticalSpaceMedium,
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // buildHighlights(state, course),
-                    // if (tags.isNotEmpty) ...[
-                    //   AppSpacing.verticalSpaceMedium,
-                    //   CText('Tags', type: TextType.titleSmall),
-                    //   AppSpacing.verticalSpaceSmall,
-                    //   Wrap(
-                    //     spacing: 8,
-                    //     runSpacing: 8,
-                    //     children: [
-                    //       for (final tag in tags)
-                    //         Chip(
-                    //           label: CText(
-                    //             tag,
-                    //             type: TextType.bodySmall,
-                    //             color: AppColors.gray800,
-                    //           ),
-                    //           backgroundColor: AppColors.gray200,
-                    //           materialTapTargetSize:
-                    //               MaterialTapTargetSize.shrinkWrap,
-                    //           padding:
-                    //               const EdgeInsets.symmetric(horizontal: 4),
-                    //         ),
-                    //     ],
-                    //   ),
-                    //   AppSpacing.verticalSpaceMedium,
-                    // ],
-                    // AppSpacing.verticalSpaceMedium,
-                  ],
+              if (isLoading)
+                const SizedBox(
+                  height: 120,
+                  child: Center(child: CircularProgressIndicator()),
                 ),
-              ),
-            if (isLoading)
-              const SizedBox(
-                height: 120,
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            if (error != null && details == null)
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: AppColors.failure,
+              if (error != null && details == null)
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: AppColors.failure,
+                      ),
+                      AppSpacing.verticalSpaceMedium,
+                      CText(
+                        error.message,
+                        type: TextType.bodyLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      AppSpacing.verticalSpaceMedium,
+                      ReusableButton(
+                        text: 'Retry',
+                        onPressed: () => ref
+                            .read(coursesViewModelProvider.notifier)
+                            .getDetails(widget.courseId),
+                      ),
+                    ],
+                  ),
+                ),
+              if (details != null) ...[
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    tabBarTheme: TabBarThemeData(
+                      dividerColor:
+                          Colors.transparent, // 👈 removes bottom line
+
+                      overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                        states,
+                      ) {
+                        if (states.contains(WidgetState.hovered) ||
+                            states.contains(WidgetState.focused) ||
+                            states.contains(WidgetState.pressed)) {
+                          return Colors
+                              .transparent; // remove hover/press overlay
+                        }
+                        return null;
+                      }),
                     ),
-                    AppSpacing.verticalSpaceMedium,
-                    CText(
-                      error.message,
-                      type: TextType.bodyLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    AppSpacing.verticalSpaceMedium,
-                    ReusableButton(
-                      text: 'Retry',
-                      onPressed: () => ref
-                          .read(coursesViewModelProvider.notifier)
-                          .getDetails(widget.courseId),
-                    ),
-                  ],
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicatorColor: Colors.transparent,
+                    unselectedLabelColor: AppColors.gray800,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    tabs: [
+                      for (var i = 0; i < _tabTitles.length; i++)
+                        ExploreTabContainer(
+                          text: _tabTitles[i],
+                          isSelected: _tabController.index == i,
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            if (details != null) ...[
-              TabBar(
-                controller: _tabController,
-                indicatorColor: Colors.transparent,
-                unselectedLabelColor: AppColors.gray800,
-                isScrollable: true,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24.0),
-                  color: Colors.transparent,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IndexedStack(
+                    index: _tabController.index,
+                    children: const [
+                      SyllabusInfo(),
+                      MaterialsInfo(),
+                      LecturesDetails(),
+                      ClassesInfo(),
+                      MockTestList(),
+                      LecturersInfo(),
+                    ],
+                  ),
                 ),
-                tabAlignment: TabAlignment.start,
-                tabs: [
-                  for (var i = 0; i < _tabTitles.length; i++)
-                    ExploreTabContainer(
-                      text: _tabTitles[i],
-                      isSelected: _tabController.index == i,
-                    ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: IndexedStack(
-                  index: _tabController.index,
-                  children: const [
-                    SyllabusInfo(),
-                    MaterialsInfo(),
-                    LecturesDetails(),
-                    ClassesInfo(),
-                    MockTestList(),
-                    LecturersInfo(),
-                  ],
-                ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       bottomNavigationBar: details != null && !state.isEnrolled
@@ -660,33 +802,121 @@ class _EnrolledCourseDetailsPageState
                             color: AppColors.gray600,
                           ),
                           const SizedBox(height: 4),
-                          CText(
-                            course != null
-                                ? (course['enrollmentCost'] != null &&
-                                          (course['enrollmentCost'] is num)
-                                      ? 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}'
-                                      : 'Rs. 0')
-                                : 'Rs. 0',
-                            type: TextType.headlineSmall,
-                            color: AppColors.black,
+                          Row(
+                            children: [
+                              if (course != null) ...[
+                                if (course['hasOffer'] == true &&
+                                    course['enrollmentCost'] != null &&
+                                    course['discountedPrice'] != null &&
+                                    (course['enrollmentCost'] as num) >
+                                        (course['discountedPrice'] as num)) ...[
+                                  // Discounted Price
+                                  CText(
+                                    'Rs. ${NumberFormat.decimalPattern().format(course['discountedPrice'])}',
+                                    type: TextType.headlineSmall,
+                                    color: AppColors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  // Original Price (Strikethrough)
+                                  Text(
+                                    'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}',
+                                    style: const TextStyle(
+                                      fontSize:
+                                          12.0, // Assuming bodySmall size, adjust if needed
+                                      color: Color.fromRGBO(123, 138, 153, 1),
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                ] else ...[
+                                  // Regular Price
+                                  CText(
+                                    (course['enrollmentCost'] != null &&
+                                            (course['enrollmentCost'] is num))
+                                        ? ((course['enrollmentCost'] as num) ==
+                                                  0
+                                              ? 'Free'
+                                              : 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}')
+                                        : 'Rs. 0',
+                                    type: TextType.headlineSmall,
+                                    color: AppColors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ],
+                              ] else ...[
+                                const CText(
+                                  'Rs. 0',
+                                  type: TextType.headlineSmall,
+                                  color: AppColors.black,
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(width: 12),
                     // Enroll button on the right
-                    EnrollWithEsewaButton(
-                      courseId: widget.courseId,
-                      isEnrolled: false,
-                      promoCode: null,
-                      enrollType: 'course_enrollment',
-                    ),
+                    if (((course != null &&
+                            course['hasOffer'] == true &&
+                            course['discountedPrice'] != null)
+                        ? ((course['discountedPrice'] as num) <= 0)
+                        : (((course?['enrollmentCost'] as num?) ?? 0) <= 0)))
+                      ReusableButton(
+                        text: 'Enroll Now',
+                        onPressed: _handleFreeEnrollment,
+                        backgroundColor: AppColors.secondary,
+                      )
+                    else
+                      EnrollWithEsewaButton(
+                        courseId: widget.courseId,
+                        isEnrolled: false,
+                        promoCode: null,
+                        enrollType: 'course_enrollment',
+                      ),
                   ],
                 ),
               ),
             )
           : null,
     );
+  }
+
+  /// Force refresh the currently selected tab's data
+  void _refreshCurrentTab() {
+    if (!mounted) return;
+    final index = _tabController.index;
+    if (index <= 0) return; // Syllabus tab does not need remote fetch
+
+    final currentState = ref.read(coursesViewModelProvider);
+    if (!currentState.isEnrolled) {
+      debugPrint('Refresh: user not enrolled, skipping tab refresh');
+      return;
+    }
+
+    final notifier = ref.read(coursesViewModelProvider.notifier);
+    final courseId = widget.courseId;
+    debugPrint('Refreshing current tab -> ${_tabTitles[index]} (index $index)');
+
+    switch (index) {
+      case 1:
+        notifier.refreshMaterials(courseId, force: true);
+        break;
+      case 2:
+        notifier.refreshLectures(courseId, force: true);
+        break;
+      case 3:
+        notifier.refreshClasses(courseId, force: true);
+        break;
+      case 4:
+        notifier.refreshMockTests(courseId, force: true);
+        break;
+      case 5:
+        notifier.refreshLecturers(courseId, force: true);
+        break;
+      default:
+        break;
+    }
   }
 
   void _handleTabSelection(int index) {

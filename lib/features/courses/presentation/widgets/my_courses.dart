@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/core.dart';
 import '../../model/enrollment_models.dart';
@@ -137,7 +138,10 @@ class _EnrollmentCourseCard extends StatelessWidget {
     final title = course?.courseTitle ?? 'Course';
     final progressPercentage =
         (enrollment.progress?.progressPercentage ?? 0).clamp(0, 100);
+    final completedLectures = enrollment.progress?.completedLecturesCount ?? 0;
+    final totalLectures = enrollment.progress?.totalLectures ?? 0;
     final expiry = _parseDate(enrollment.expiryDate);
+    final enrollmentDate = _parseDate(enrollment.enrollmentDate);
 
     // Calculate days until expiry
     String? expiryText;
@@ -153,82 +157,114 @@ class _EnrollmentCourseCard extends StatelessWidget {
       }
     }
 
+    // Status chip
+
     return GestureDetector(
       onTap: onOpen,
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.gray100,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.gray200),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Course Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: CustomCachedNetworkImage(
-                imageUrl: course?.courseImageUrl,
-                size: Size(100, 100),
-                fitStatus: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CText(
-                    title,
-                    type: TextType.bodyLarge,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Course Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CustomCachedNetworkImage(
+                    imageUrl:
+                        course?.courseIconUrl ?? course?.courseImageUrl,
+                    size: Size(74, 74),
+                    fitStatus: BoxFit.cover,
                   ),
-                  if (expiryText != null) ...[
-                    const SizedBox(height: 4),
-                    CText(
-                      expiryText,
-                      type: TextType.bodySmall,
-                      color: AppColors.gray600,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Progress Circle
-            if (progressPercentage > 0)
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      height: 60,
-                      child: CircularProgressIndicator(
-                        value: progressPercentage / 100,
-                        strokeWidth: 6,
-                        backgroundColor: AppColors.gray300,
-                        valueColor: const AlwaysStoppedAnimation(
-                          Color(0xFF1E3A5F), // Dark blue
-                        ),
-                      ),
-                    ),
-                    CText(
-                      '${progressPercentage.toInt()}%',
-                      type: TextType.bodySmall,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                    ),
-                  ],
                 ),
-              ),
+                const SizedBox(width: 12),
+
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CText(
+                              title,
+                              type: TextType.bodyLarge,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.black,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (enrollmentDate != null) ...[
+                        const SizedBox(height: 4),
+                        CText(
+                          'Enrolled: ${_formatDate(enrollmentDate)}',
+                          type: TextType.bodySmall,
+                          color: AppColors.gray600,
+                        ),
+                      ],
+                      if (expiryText != null) ...[
+                        const SizedBox(height: 2),
+                        CText(
+                          expiryText,
+                          type: TextType.bodySmall,
+                          color: AppColors.gray600,
+                        ),
+                      ],
+                      // if (totalLectures > 0) ...[
+                      //   const SizedBox(height: 4),
+                      //   CText(
+                      //     '$completedLectures of $totalLectures lectures completed',
+                      //     type: TextType.bodySmall,
+                      //     color: AppColors.gray700,
+                      //   ),
+                      // ],
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Progress Circle
+                if (progressPercentage > 0)
+                  SizedBox(
+                    width: 60,
+                    height: 60,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 60,
+                          height: 60,
+                          child: CircularProgressIndicator(
+                            value: progressPercentage / 100,
+                            strokeWidth: 6,
+                            backgroundColor: AppColors.gray300,
+                            valueColor: const AlwaysStoppedAnimation(
+                              Color(0xFF1E3A5F), // Dark blue
+                            ),
+                          ),
+                        ),
+                        CText(
+                          '${progressPercentage.toInt()}%',
+                          type: TextType.bodySmall,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black,
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
@@ -238,6 +274,10 @@ class _EnrollmentCourseCard extends StatelessWidget {
   static DateTime? _parseDate(String? value) {
     if (value == null || value.isEmpty) return null;
     return DateTime.tryParse(value);
+  }
+
+  static String _formatDate(DateTime dateTime) {
+    return DateFormat('d MMM, yyyy').format(dateTime);
   }
 }
 

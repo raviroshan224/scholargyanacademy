@@ -681,7 +681,7 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
         result.fold(
           (failure) {
-            print('❌ Proactive token refresh failed: ${failure.message}');
+            print('❌ Proactive token refresh failed: ${failure!.message}');
             // Don't logout here - let the interceptor handle it on next API call
           },
           (tokens) {

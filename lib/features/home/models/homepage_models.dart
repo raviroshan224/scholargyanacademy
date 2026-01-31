@@ -4,6 +4,7 @@ class HomepageResponse {
     this.preferredCategories = const <Category>[],
     this.recommendedExams = const <Exam>[],
     this.recommendedCourses = const <Course>[],
+    this.bannerCourses = const <Course>[],
     this.latestOngoingCourse,
     this.liveClasses = const <LiveClass>[],
     this.upcomingExam,
@@ -14,6 +15,7 @@ class HomepageResponse {
   final List<Category> preferredCategories;
   final List<Exam> recommendedExams;
   final List<Course> recommendedCourses;
+  final List<Course> bannerCourses;
   final LatestOngoingCourse? latestOngoingCourse;
   final List<LiveClass> liveClasses;
   final UpcomingExam? upcomingExam;
@@ -27,6 +29,7 @@ class HomepageResponse {
       recommendedExams: _decodeList(json['recommendedExams'], Exam.fromJson),
       recommendedCourses:
           _decodeList(json['recommendedCourses'], Course.fromJson),
+      bannerCourses: _decodeList(json['bannerCourses'], Course.fromJson),
       latestOngoingCourse: _decodeObject(
         json['latestOngoingCourse'],
         LatestOngoingCourse.fromJson,
@@ -47,10 +50,33 @@ class UserProfile {
   final String? fullName;
   final String? photo;
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-        fullName: json['fullName']?.toString(),
-        photo: json['photo']?.toString(),
-      );
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    String? resolvedPhoto;
+    final raw = json['photo'];
+    if (raw is String) {
+      resolvedPhoto = raw;
+    } else if (raw is Map) {
+      final map = Map<String, dynamic>.from(raw as Map);
+      // Try common keys
+      final candidates = [
+        map['url'],
+        map['path'],
+        map['photoUrl'],
+        map['secure_url'],
+      ].whereType<String>().toList();
+      for (final c in candidates) {
+        if (c.trim().isNotEmpty) {
+          resolvedPhoto = c;
+          break;
+        }
+      }
+    }
+
+    return UserProfile(
+      fullName: json['fullName']?.toString(),
+      photo: resolvedPhoto,
+    );
+  }
 }
 
 class Category {
@@ -106,7 +132,10 @@ class Course {
     this.id,
     this.courseTitle,
     this.courseImageUrl,
+    this.courseIconUrl,
     this.enrollmentCost,
+    this.discountedPrice,
+    this.hasOffer,
     this.durationHours,
     this.isSaved,
     this.categoryName,
@@ -116,7 +145,10 @@ class Course {
   final String? id;
   final String? courseTitle;
   final String? courseImageUrl;
+  final String? courseIconUrl;
   final int? enrollmentCost;
+  final int? discountedPrice;
+  final bool? hasOffer;
   final int? durationHours;
   final bool? isSaved;
   final String? categoryName;
@@ -126,7 +158,13 @@ class Course {
         id: json['id']?.toString(),
         courseTitle: json['courseTitle']?.toString(),
         courseImageUrl: json['courseImageUrl']?.toString(),
+        courseIconUrl: json['courseIconUrl']?.toString(),
         enrollmentCost: _toInt(json['enrollmentCost']),
+        discountedPrice: _toInt(json['discountedPrice']),
+        hasOffer: json['hasOffer'] is bool
+            ? json['hasOffer'] as bool
+            : (json['hasOffer']?.toString().toLowerCase() == 'true' ||
+                json['hasOffer']?.toString() == '1'),
         durationHours: _toInt(json['durationHours']),
         isSaved: json['isSaved'] is bool
             ? json['isSaved'] as bool
@@ -145,6 +183,9 @@ class LatestOngoingCourse {
     this.completedLectures,
     this.totalLectures,
     this.lastAccessedLectureId,
+    this.lastAccessedLectureTitle,
+    this.lastAccessedLectureThumbnail,
+    this.lastWatchedPositionSeconds,
   });
 
   final String? id;
@@ -154,6 +195,9 @@ class LatestOngoingCourse {
   final int? completedLectures;
   final int? totalLectures;
   final String? lastAccessedLectureId;
+  final String? lastAccessedLectureTitle;
+  final String? lastAccessedLectureThumbnail;
+  final int? lastWatchedPositionSeconds;
 
   factory LatestOngoingCourse.fromJson(Map<String, dynamic> json) =>
       LatestOngoingCourse(
@@ -164,6 +208,9 @@ class LatestOngoingCourse {
         completedLectures: _toInt(json['completedLectures']),
         totalLectures: _toInt(json['totalLectures']),
         lastAccessedLectureId: json['lastAccessedLectureId']?.toString(),
+        lastAccessedLectureTitle: json['lastAccessedLectureTitle']?.toString(),
+        lastAccessedLectureThumbnail: json['lastAccessedLectureThumbnail']?.toString(),
+        lastWatchedPositionSeconds: _toInt(json['lastWatchedPositionSeconds']),
       );
 }
 

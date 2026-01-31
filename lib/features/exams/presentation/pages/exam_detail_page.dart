@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/core.dart';
 import '../../data/models/exam_models.dart';
 import '../providers/exam_detail_view_model.dart';
+import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
 
 class ExamDetailPage extends ConsumerStatefulWidget {
   const ExamDetailPage({super.key, required this.examId});
@@ -207,55 +208,65 @@ class _CourseDetailSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.gray100,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.gray200),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              height: 64,
-              width: 64,
-              child: CustomCachedNetworkImage(
-                imageUrl: course.thumbnail ?? AppAssets.dummyNetImg,
-                fitStatus: BoxFit.cover,
-              ),
+    final courseId = course.id;
+    return InkWell(
+        onTap: () {
+          if (courseId == null || courseId.isEmpty) return;
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => EnrolledCourseDetailsPage(courseId: courseId),
             ),
+          );
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.gray100,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.gray200),
           ),
-          AppSpacing.horizontalSpaceMedium,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CText(
-                  course.title,
-                  type: TextType.bodyMedium,
-                  fontWeight: FontWeight.w600,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(
+                  height: 64,
+                  width: 64,
+                  child: CustomCachedNetworkImage(
+                    imageUrl: course.thumbnail ?? AppAssets.dummyNetImg,
+                    fitStatus: BoxFit.cover,
+                  ),
                 ),
-                AppSpacing.verticalSpaceSmall,
-                _KeyValueList(
-                  entries: [
-                    MapEntry('Course ID', course.id),
-                    if (course.classCount != null)
-                      MapEntry('Class Count', course.classCount.toString()),
-                    if (course.description != null &&
-                        course.description!.isNotEmpty)
-                      MapEntry('Description', course.description!),
+              ),
+              AppSpacing.horizontalSpaceMedium,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CText(
+                      course.title,
+                      type: TextType.bodyMedium,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    AppSpacing.verticalSpaceSmall,
+                    _KeyValueList(
+                      entries: [
+                        if (course.classCount != null)
+                          MapEntry('Class Count', course.classCount.toString()),
+                        if (course.description != null &&
+                            course.description!.isNotEmpty)
+                          MapEntry('Description', course.description!),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }
 

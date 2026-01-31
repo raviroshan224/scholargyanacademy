@@ -32,7 +32,10 @@ class CourseModel {
   final String? categoryId;
   final String? categoryName;
   final String? courseImageUrl;
+  final String? courseIconUrl;
   final int? enrollmentCost;
+  final int? discountedPrice;
+  final bool? hasOffer;
   final int? durationHours;
   final int? validityDays;
   final String slug;
@@ -50,7 +53,10 @@ class CourseModel {
     this.categoryId,
     this.categoryName,
     this.courseImageUrl,
+    this.courseIconUrl,
     this.enrollmentCost,
+    this.discountedPrice,
+    this.hasOffer,
     this.durationHours,
     this.validityDays,
     this.displayOrder,
@@ -65,7 +71,13 @@ class CourseModel {
         categoryId: json['categoryId'],
         categoryName: json['categoryName'],
         courseImageUrl: json['courseImageUrl'],
+        courseIconUrl: json['courseIconUrl'],
         enrollmentCost: json['enrollmentCost'],
+        discountedPrice: json['discountedPrice'],
+        hasOffer: json['hasOffer'] is bool
+            ? json['hasOffer'] as bool
+            : (json['hasOffer']?.toString().toLowerCase() == 'true' ||
+                json['hasOffer']?.toString() == '1'),
         durationHours: json['durationHours'],
         validityDays: json['validityDays'],
         slug: json['slug'] ?? '',
@@ -82,7 +94,10 @@ class CourseModel {
     String? categoryId,
     String? categoryName,
     String? courseImageUrl,
+    String? courseIconUrl,
     int? enrollmentCost,
+    int? discountedPrice,
+    bool? hasOffer,
     int? durationHours,
     int? validityDays,
     String? slug,
@@ -98,7 +113,10 @@ class CourseModel {
       categoryId: categoryId ?? this.categoryId,
       categoryName: categoryName ?? this.categoryName,
       courseImageUrl: courseImageUrl ?? this.courseImageUrl,
+      courseIconUrl: courseIconUrl ?? this.courseIconUrl,
       enrollmentCost: enrollmentCost ?? this.enrollmentCost,
+      discountedPrice: discountedPrice ?? this.discountedPrice,
+      hasOffer: hasOffer ?? this.hasOffer,
       durationHours: durationHours ?? this.durationHours,
       validityDays: validityDays ?? this.validityDays,
       slug: slug ?? this.slug,
@@ -311,6 +329,7 @@ class LectureModel {
   final String name;
   final String? description;
   final String? thumbnailUrl;
+  final String? coverImageUrl;
   final int? durationSeconds;
   final int? displayOrder;
   final bool isFree;
@@ -331,6 +350,7 @@ class LectureModel {
     required this.name,
     this.description,
     this.thumbnailUrl,
+    this.coverImageUrl,
     this.durationSeconds,
     this.displayOrder,
     this.isFree = false,
@@ -354,6 +374,7 @@ class LectureModel {
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString(),
       thumbnailUrl: json['thumbnailUrl']?.toString(),
+      coverImageUrl: json['coverImageUrl']?.toString(),
       durationSeconds: json['durationSeconds'] is num
           ? (json['durationSeconds'] as num).toInt()
           : null,

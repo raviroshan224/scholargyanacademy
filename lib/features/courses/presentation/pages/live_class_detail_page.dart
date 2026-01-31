@@ -5,7 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/core.dart';
 import '../../model/live_class_models.dart';
 import '../../view_model/live_class_join_view_model.dart';
-
+import 'meeting_page.dart';
+import 'meeting_page_v2.dart'; // ✅ NEW: Production-grade meeting UI
 
 class LiveClassDetailPage extends ConsumerStatefulWidget {
   const LiveClassDetailPage({
@@ -40,10 +41,25 @@ class _LiveClassDetailPageState extends ConsumerState<LiveClassDetailPage> {
         if (next.status == LiveClassJoinStatus.joining &&
             previous?.status != LiveClassJoinStatus.joining &&
             next.token != null) {
-          // Feature disabled
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Live classes are currently unavailable in this version.')),
-          );
+          debugPrint('🚀 [UI] Navigating to MeetingPageV2 BEFORE join completes...');
+          
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            
+            // Navigate with the join token so MeetingPageV2 can complete the join
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MeetingPageV2( // ✅ SWITCHED TO V2
+                  token: next.token!,
+                  classId: next.processingClassId ?? '',
+                ),
+              ),
+            ).then((_) {
+              // Reset state when returning from meeting
+              joinNotifier.reset();
+            });
+          });
         }
 
         // Handle join failure

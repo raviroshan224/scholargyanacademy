@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:either_dart/either.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/api_endpoints.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/errors/failure.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/http_service.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/http_service_provider.dart';
 
+import '../../../config/services/remote_services/api_endpoints.dart';
+import '../../../config/services/remote_services/errors/failure.dart';
+import '../../../config/services/remote_services/http_service.dart';
+import '../../../config/services/remote_services/http_service_provider.dart';
 import '../model/course_models.dart';
 
 abstract class CourseService {
@@ -42,6 +42,8 @@ abstract class CourseService {
   Future<Either<Failure, LectureModel>> lectureById(String id);
   Future<Either<Failure, Map<String, dynamic>>> previewLecture(String id);
   Future<Either<Failure, Map<String, dynamic>>> watchLecture(String id);
+  Future<Either<Failure, void>> completeLecture(String lectureId);
+  Future<Either<Failure, void>> enrollFreeCourse(String courseId);
   Future<Either<Failure, List<MockTestModel>>> mockTestsByCourse(
     String courseId, {
     int page = 1,
@@ -79,10 +81,11 @@ class CourseServiceImpl implements CourseService {
       queryParameters: qp,
       requiresAuth: false,
     );
-    return res.fold(
-      (l) => Left(l),
-      (r) => Right(PagedCourses.fromJson(r.data)),
-    );
+    return res.fold((l) => Left(l), (r) {
+      // Print the raw JSON response for debugging
+      print('Raw courses API response: ${jsonEncode(r.data)}');
+      return Right(PagedCourses.fromJson(r.data));
+    });
   }
 
   @override
@@ -340,6 +343,26 @@ class CourseServiceImpl implements CourseService {
       if (data is Map) return Right(data.cast<String, dynamic>());
       return Left(Failure(message: 'Invalid lecture watch response format'));
     });
+  }
+
+  @override
+  Future<Either<Failure, void>> completeLecture(String lectureId) async {
+    final res = await _http.post(
+      ApiEndPoints.completeLecture,
+      data: {'lectureId': lectureId},
+      requiresAuth: true,
+    );
+    return res.fold((l) => Left(l), (r) => const Right(null));
+  }
+
+  @override
+  Future<Either<Failure, void>> enrollFreeCourse(String courseId) async {
+    final res = await _http.post(
+      ApiEndPoints.enrollFreeCourse,
+      data: {'courseId': courseId},
+      requiresAuth: true,
+    );
+    return res.fold((l) => Left(l), (r) => const Right(null));
   }
 
   @override

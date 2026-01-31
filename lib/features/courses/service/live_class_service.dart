@@ -21,8 +21,10 @@ abstract class LiveClassService {
   /// Requires enrollment - backend validates eligibility
   /// Returns ongoing classes by default
   Future<Either<Failure, List<LiveClassModel>>> getMyClasses({
-    required String courseId,
+    String? courseId,
     String status = 'ongoing',
+    int page = 1,
+    int limit = 10,
   });
 }
 
@@ -94,11 +96,23 @@ class LiveClassServiceImpl implements LiveClassService {
 
   @override
   Future<Either<Failure, List<LiveClassModel>>> getMyClasses({
-    required String courseId,
+    String? courseId,
     String status = 'ongoing',
+    int page = 1,
+    int limit = 10,
   }) async {
+    final queryParams = {
+      'status': status,
+      'page': page,
+      'limit': limit,
+    };
+    if (courseId != null) {
+      queryParams['courseId'] = courseId;
+    }
+
     final response = await _http.get(
-      '${ApiEndPoints.liveClassesMyClasses}?status=$status&courseId=$courseId',
+      ApiEndPoints.liveClassesMyClasses,
+      queryParameters: queryParams,
       requiresAuth: true,
     );
 

@@ -4,7 +4,7 @@
 // import 'notification/handle_notifications.dart';
 // import 'notification/local_notification_manager.dart';
 //
-
+import 'notification/handle_notifications.dart';
 import 'notification/local_notification_manager.dart';
 
 class DependencyInjection {
@@ -56,6 +56,8 @@ class DependencyInjection {
     ///11. For Notifications
 
     await LocalNotificationManager.initialize();
-
+    HandleNotifications.registerBackgroundMessageHandler();
+    HandleNotifications.notificationMethods();
+    HandleNotifications.handleNotifications();
   }
 }

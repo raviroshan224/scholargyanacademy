@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:scholarsgyanacademy/features/dashboard/presentation/pages/dashboard.dart';
-
 import '../../../../core/core.dart';
+import '../../../dashboard/presentation/pages/dashboard.dart';
 
 class ConfirmPage extends StatelessWidget {
   const ConfirmPage({super.key});
@@ -17,35 +16,31 @@ class ConfirmPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Column(
-                children: [
-                  Image.asset(AppAssets.checkMarkIcon),
-                  AppSpacing.verticalSpaceLarge,
-                  CText('Congratulations!', type: TextType.headlineLarge),
-                  AppSpacing.verticalSpaceMedium,
-                  CText(
+              child: Column(children: [
+                Image.asset(AppAssets.checkMarkIcon),
+                AppSpacing.verticalSpaceLarge,
+                CText(
+                  'Congratulations!',
+                  type: TextType.headlineLarge,
+                ),
+                AppSpacing.verticalSpaceMedium,
+                CText(
                     'You have successfully made payment and enrolled the course.',
                     textAlign: TextAlign.center,
                     type: TextType.bodyMedium,
-                    color: AppColors.gray600,
-                  ),
-                ],
-              ),
+                    color: AppColors.gray600),
+              ]),
             ),
           ],
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(top: 0, bottom: 20, right: 20, left: 20),
-        child: ReusableButton(
-          text: "Go To Course",
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Dashboard()),
-            );
-          },
-        ),
+        padding: const EdgeInsets.only(top:0, bottom:20, right:20,left:20),
+        child: ReusableButton(text: "Go To Course", onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => Dashboard()));
+
+        }),
       ),
     );
   }

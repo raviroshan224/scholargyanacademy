@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/config/services/navigation_service.dart';
 import 'package:scholarsgyanacademy/features/auth/model/auth_models.dart';
 import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
 

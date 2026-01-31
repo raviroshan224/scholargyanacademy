@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/courses/presentation/widgets/saved_courses.dart';
+
+import '../../../../../core/constant/app_colors.dart';
+import '../../../../../core/widgets/app_bar/custom_app_bar.dart';
+import '../../../../courses/presentation/widgets/saved_courses.dart';
 
 class SavedPages extends StatelessWidget {
   const SavedPages({super.key});

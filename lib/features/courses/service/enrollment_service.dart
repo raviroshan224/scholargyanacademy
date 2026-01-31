@@ -1,10 +1,10 @@
 import 'package:either_dart/either.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/api_endpoints.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/errors/failure.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/http_service.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/http_service_provider.dart';
 
+import '../../../config/services/remote_services/api_endpoints.dart';
+import '../../../config/services/remote_services/errors/failure.dart';
+import '../../../config/services/remote_services/http_service.dart';
+import '../../../config/services/remote_services/http_service_provider.dart';
 import '../model/enrollment_models.dart';
 import '../model/live_class_models.dart';
 

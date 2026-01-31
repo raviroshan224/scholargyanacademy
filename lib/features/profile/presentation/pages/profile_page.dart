@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/config/services/navigation_service.dart';
 
+import '../../../../config/services/navigation_service.dart';
 import '../../../../core/core.dart';
 import '../../../auth/view_model/auth_state.dart';
 import '../../../auth/view_model/providers/auth_providers.dart';
 import '../../../before_auth/presentation/pages/course_selection.dart';
+import '../../../courses/presentation/pages/upcoming_live_classes_page.dart';
 import '../../../exams/presentation/pages/exam_list_page.dart';
 import '../../../test/test.dart';
 import '../../profile.dart';
@@ -86,21 +87,30 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (context) => const ExamListPage()),
                 );
               },
-              icon: AppAssets.profileCoursesIcon,
+              icon: Icons.assignment_outlined,
               cardTitle: 'Exam Lists',
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 6.0),
-              child: ProfileTextRow(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SavedPages()),
-                  );
-                },
-                icon: AppAssets.savedIcon,
-                cardTitle: 'Saved Courses',
-              ),
+            ProfileTextRow(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SavedPages()),
+                );
+              },
+              icon: Icons.bookmark_outline,
+              cardTitle: 'Saved Courses',
+            ),
+            ProfileTextRow(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UpcomingLiveClassesPage(),
+                  ),
+                );
+              },
+              icon: Icons.schedule,
+              cardTitle: 'Upcoming Classes',
             ),
             ProfileTextRow(
               onPressed: () {
@@ -109,7 +119,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (context) => TestPage()),
                 );
               },
-              icon: AppAssets.testIcon,
+              icon: Icons.bookmark_outline,
               cardTitle: 'Mock Tests',
             ),
             ProfileTextRow(
@@ -121,7 +131,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 );
               },
-              icon: AppAssets.testIcon,
+              icon: Icons.category_outlined,
               cardTitle: 'Preferred Categories',
             ),
             AppSpacing.verticalSpaceSmall,
@@ -137,7 +147,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (_) => const EditPage()),
                 );
               },
-              icon: AppAssets.userIcon,
+              icon: Icons.person_outline,
               cardTitle: 'My Profile',
               isLoading: isLoading,
             ),
@@ -192,7 +202,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   );
                 }
               },
-              icon: AppAssets.logoutIcon,
+              icon: Icons.logout,
               cardTitle: 'Logout',
               isLoading: isLoading,
             ),
@@ -208,7 +218,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (context) => AboutUsPage()),
                 );
               },
-              icon: AppAssets.aboutUSIcon,
+              icon: Icons.info_outline,
               cardTitle: 'About Us',
             ),
             ProfileTextRow(
@@ -218,7 +228,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (context) => TermsAndConditions()),
                 );
               },
-              icon: AppAssets.termsIcon,
+              icon: Icons.description_outlined,
               cardTitle: 'Terms & Conditions',
             ),
             ProfileTextRow(
@@ -228,7 +238,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (context) => FAQPage()),
                 );
               },
-              icon: AppAssets.faqIcon,
+              icon: Icons.help,
               cardTitle: 'FAQs',
             ),
             ProfileTextRow(
@@ -238,12 +248,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   MaterialPageRoute(builder: (context) => SupportPage()),
                 );
               },
-              icon: AppAssets.helpSupportIcon,
+              icon: Icons.support_outlined,
               cardTitle: 'Help & support',
             ),
             ProfileTextRow(
               onPressed: () {},
-              icon: AppAssets.privacyPolicyIcon,
+              icon: Icons.privacy_tip,
               cardTitle: 'Privacy Policy',
             ),
           ],

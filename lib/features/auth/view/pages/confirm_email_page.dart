@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/auth/view/pages/otp_page.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/confirm_email_view_model.dart';
+
+import '../../../../core/constant/app_colors.dart';
+import '../../../../core/constant/app_string.dart';
+import '../../../../core/utils/ui_helper/app_spacing.dart';
+import '../../../../core/widgets/app_bar/custom_app_bar.dart';
+import '../../../../core/widgets/buttons/reusable_buttons.dart';
+import '../../../../core/widgets/form/cus_text_field.dart';
+import '../../../../core/widgets/form/field_validators.dart';
+import '../../../../core/widgets/text/custom_text.dart';
+import '../../view_model/confirm_email_view_model.dart';
+import 'otp_page.dart';
 
 class ConfirmEmailPage extends ConsumerWidget {
   const ConfirmEmailPage({super.key});

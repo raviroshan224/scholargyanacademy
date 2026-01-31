@@ -1,6 +1,6 @@
 class AppAssets {
   /// Add images below
-  static String appLogo = 'assets/logo/logo.jpg';
+  static String appLogo = 'assets/logo/logo.jpeg';
 
   ///onBoard
   static String onboardPictureOne = 'assets/auth/on_board_one.svg';

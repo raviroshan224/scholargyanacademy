@@ -1,12 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/core/services/simple_payment_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/core.dart';
+import '../../../../../core/services/simple_payment_service.dart';
 import '../../../../auth/view_model/providers/auth_providers.dart';
 import '../../../models/mock_test_models.dart';
 import '../../../view_model/mock_test_view_model.dart';
@@ -64,9 +62,7 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Payment and test access controls
-                if (!mockTest.isFree && !mockTest.isPurchased) ...[
-                  _BuyTestButton(testId: mockTest.id),
-                ] else if (mockTest.canTakeTest) ...[
+                if (mockTest.canTakeTest) ...[
                   ReusableButton(
                     text: 'Start Test',
                     isLoading: ref
@@ -80,6 +76,8 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
                       );
                     },
                   ),
+                ] else if (!mockTest.isFree && !mockTest.isPurchased) ...[
+                  _BuyTestButton(testId: mockTest.id),
                 ] else ...[
                   // Blocked state from backend
                   const Padding(
@@ -286,7 +284,7 @@ class _BuyTestButtonState extends ConsumerState<_BuyTestButton> {
                 'userId': userId,
               },
             );
-        debugger(message: uri.toString());
+        // debugger(message: uri.toString());
         final launched = await launchUrl(
           uri,
           mode: LaunchMode.externalNonBrowserApplication,

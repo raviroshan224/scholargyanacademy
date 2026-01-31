@@ -4,9 +4,9 @@ import 'package:either_dart/either.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/errors/failure.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/http_service_provider.dart';
 
+import '../../../config/services/remote_services/errors/failure.dart';
+import '../../../config/services/remote_services/http_service_provider.dart';
 import '../../profile/data/models/favorite_category_model.dart';
 import '../../profile/data/repo/category_repository.dart';
 import '../model/course_models.dart';
@@ -29,6 +29,7 @@ class CoursesState {
   final bool loadingMockTests;
   final bool loadingEnrollments;
   final bool loadingLiveClasses;
+  final bool loadingUpcomingLiveClasses;
 
   final Failure? publicError;
   final Failure? savedError;
@@ -42,6 +43,7 @@ class CoursesState {
   final Failure? mockTestsError;
   final Failure? enrollmentsError;
   final Failure? liveClassesError;
+  final Failure? upcomingLiveClassesError;
 
   final List<CourseModel> publicCourses;
   final PagedMeta? publicMeta;
@@ -54,6 +56,7 @@ class CoursesState {
   final String? currentCategoryId;
   final CourseModel? selected;
   final Map<String, dynamic>? details;
+  final String? lastDetailsCourseId;
   final List<ChildCategoryModel> categories;
   final List<SubjectModel> subjects;
   final List<LecturerModel> lecturers;
@@ -72,6 +75,10 @@ class CoursesState {
   final String? liveClassesCourseId;
   final String? liveClassesSubjectId;
 
+  final List<LiveClassModel> upcomingLiveClasses;
+  final PagedMeta? upcomingLiveClassesMeta;
+  final bool upcomingLiveClassesLoaded;
+
   const CoursesState({
     this.loadingPublic = false,
     this.loadingSaved = false,
@@ -85,6 +92,7 @@ class CoursesState {
     this.loadingMockTests = false,
     this.loadingEnrollments = false,
     this.loadingLiveClasses = false,
+    this.loadingUpcomingLiveClasses = false,
     this.publicError,
     this.savedError,
     this.detailsError,
@@ -97,6 +105,7 @@ class CoursesState {
     this.mockTestsError,
     this.enrollmentsError,
     this.liveClassesError,
+    this.upcomingLiveClassesError,
     this.publicCourses = const [],
     this.publicMeta,
     this.savedCourses = const [],
@@ -107,6 +116,7 @@ class CoursesState {
     this.currentCategoryId,
     this.selected,
     this.details,
+    this.lastDetailsCourseId,
     this.categories = const [],
     this.subjects = const [],
     this.lecturers = const [],
@@ -122,7 +132,19 @@ class CoursesState {
     this.liveClassesStatus,
     this.liveClassesCourseId,
     this.liveClassesSubjectId,
+    this.upcomingLiveClasses = const [],
+    this.upcomingLiveClassesMeta,
+    this.upcomingLiveClassesLoaded = false,
   });
+
+  /// Returns the course ID from currently loaded details.
+  String? get detailsCourseId {
+    final courseMap = details?['course'];
+    if (courseMap is Map<String, dynamic>) {
+      return courseMap['id']?.toString();
+    }
+    return lastDetailsCourseId;
+  }
 
   bool get isEnrolled {
     final payload = details;
@@ -149,6 +171,7 @@ class CoursesState {
     bool? loadingMockTests,
     bool? loadingEnrollments,
     bool? loadingLiveClasses,
+    bool? loadingUpcomingLiveClasses,
     Failure? publicError,
     Failure? savedError,
     Failure? detailsError,
@@ -161,6 +184,7 @@ class CoursesState {
     Failure? mockTestsError,
     Failure? enrollmentsError,
     Failure? liveClassesError,
+    Failure? upcomingLiveClassesError,
     bool clearPublicError = false,
     bool clearSavedError = false,
     bool clearDetailsError = false,
@@ -173,6 +197,7 @@ class CoursesState {
     bool clearMockTestsError = false,
     bool clearEnrollmentsError = false,
     bool clearLiveClassesError = false,
+    bool clearUpcomingLiveClassesError = false,
     List<CourseModel>? publicCourses,
     PagedMeta? publicMeta,
     List<CourseModel>? savedCourses,
@@ -185,6 +210,7 @@ class CoursesState {
     bool setCurrentCategoryId = false,
     CourseModel? selected,
     Map<String, dynamic>? details,
+    String? lastDetailsCourseId,
     List<ChildCategoryModel>? categories,
     List<SubjectModel>? subjects,
     List<LecturerModel>? lecturers,
@@ -203,6 +229,9 @@ class CoursesState {
     bool setLiveClassesCourseId = false,
     String? liveClassesSubjectId,
     bool setLiveClassesSubjectId = false,
+    List<LiveClassModel>? upcomingLiveClasses,
+    PagedMeta? upcomingLiveClassesMeta,
+    bool? upcomingLiveClassesLoaded,
   }) {
     return CoursesState(
       loadingPublic: loadingPublic ?? this.loadingPublic,
@@ -217,6 +246,8 @@ class CoursesState {
       loadingMockTests: loadingMockTests ?? this.loadingMockTests,
       loadingEnrollments: loadingEnrollments ?? this.loadingEnrollments,
       loadingLiveClasses: loadingLiveClasses ?? this.loadingLiveClasses,
+      loadingUpcomingLiveClasses:
+          loadingUpcomingLiveClasses ?? this.loadingUpcomingLiveClasses,
       publicError: clearPublicError ? null : (publicError ?? this.publicError),
       savedError: clearSavedError ? null : (savedError ?? this.savedError),
       detailsError: clearDetailsError
@@ -249,6 +280,9 @@ class CoursesState {
       liveClassesError: clearLiveClassesError
           ? null
           : (liveClassesError ?? this.liveClassesError),
+      upcomingLiveClassesError: clearUpcomingLiveClassesError
+          ? null
+          : (upcomingLiveClassesError ?? this.upcomingLiveClassesError),
       publicCourses: publicCourses ?? this.publicCourses,
       publicMeta: publicMeta ?? this.publicMeta,
       savedCourses: savedCourses ?? this.savedCourses,
@@ -263,6 +297,7 @@ class CoursesState {
           : (currentCategoryId ?? this.currentCategoryId),
       selected: selected ?? this.selected,
       details: details ?? this.details,
+      lastDetailsCourseId: lastDetailsCourseId ?? this.lastDetailsCourseId,
       categories: categories ?? this.categories,
       subjects: subjects ?? this.subjects,
       lecturers: lecturers ?? this.lecturers,
@@ -284,6 +319,11 @@ class CoursesState {
       liveClassesSubjectId: setLiveClassesSubjectId
           ? liveClassesSubjectId
           : (liveClassesSubjectId ?? this.liveClassesSubjectId),
+      upcomingLiveClasses: upcomingLiveClasses ?? this.upcomingLiveClasses,
+      upcomingLiveClassesMeta:
+          upcomingLiveClassesMeta ?? this.upcomingLiveClassesMeta,
+      upcomingLiveClassesLoaded:
+          upcomingLiveClassesLoaded ?? this.upcomingLiveClassesLoaded,
     );
   }
 }
@@ -361,9 +401,22 @@ class CourseViewModel extends StateNotifier<CoursesState> {
       categoryId: (nextCategory?.isNotEmpty ?? false) ? nextCategory : null,
     );
 
+    // Print the response for debugging
+    print('Courses list response: $response');
+
     state = response.fold(
       (failure) => state.copyWith(loadingPublic: false, publicError: failure),
       (paged) {
+        // Print the complete response for debugging
+        print('Complete courses response:');
+        print(
+          'Meta: page=${paged.meta.page}, limit=${paged.meta.limit}, total=${paged.meta.total}, hasNext=${paged.meta.hasNext}',
+        );
+        print('Data length: ${paged.data.length}');
+        print(
+          'First course: ${paged.data.isNotEmpty ? paged.data.first.toString() : 'No courses'}',
+        );
+
         final savedIds = state.savedCourseIds;
         final incoming = paged.data
             .map(
@@ -565,6 +618,70 @@ class CourseViewModel extends StateNotifier<CoursesState> {
     );
   }
 
+  Future<void> fetchUpcomingLiveClasses({
+    int page = 1,
+    int limit = 10,
+    bool force = false,
+  }) async {
+    if (state.loadingUpcomingLiveClasses) return;
+
+    if (!force && state.upcomingLiveClassesLoaded && page == 1) return;
+
+    final isFirstPage = page == 1;
+    final shouldReset = isFirstPage && force;
+
+    state = state.copyWith(
+      loadingUpcomingLiveClasses: true,
+      clearUpcomingLiveClassesError: true,
+      upcomingLiveClasses: shouldReset
+          ? const <LiveClassModel>[]
+          : state.upcomingLiveClasses,
+    );
+
+    final response = await _enrollmentService.myLiveClasses(
+      status: 'upcoming',
+      page: page,
+      limit: limit,
+    );
+
+    state = response.fold(
+      (failure) => state.copyWith(
+        loadingUpcomingLiveClasses: false,
+        upcomingLiveClassesError: failure,
+      ),
+      (paged) {
+        final base = (isFirstPage || shouldReset)
+            ? <LiveClassModel>[]
+            : state.upcomingLiveClasses;
+        final merged = [...base, ...paged.data];
+        // Dedup logic
+        final deduped = <String, LiveClassModel>{};
+        for (final item in merged) {
+          final key = item.id.isNotEmpty
+              ? item.id
+              : '${item.title}_${item.startTime?.millisecondsSinceEpoch ?? merged.indexOf(item)}';
+          deduped[key] = item;
+        }
+        final nextList = deduped.values.toList(growable: false);
+
+        return state.copyWith(
+          loadingUpcomingLiveClasses: false,
+          upcomingLiveClasses: nextList,
+          upcomingLiveClassesMeta: paged.meta ?? state.upcomingLiveClassesMeta,
+          upcomingLiveClassesLoaded: true,
+          upcomingLiveClassesError: null,
+        );
+      },
+    );
+  }
+
+  Future<void> loadMoreUpcomingLiveClasses() async {
+    final meta = state.upcomingLiveClassesMeta;
+    if (state.loadingUpcomingLiveClasses || meta == null || !meta.hasNext)
+      return;
+    await fetchUpcomingLiveClasses(page: meta.page + 1, limit: meta.limit);
+  }
+
   Future<void> getById(String id) async {
     state = state.copyWith(loadingDetails: true, clearDetailsError: true);
     final response = await _service.byId(id);
@@ -596,6 +713,11 @@ class CourseViewModel extends StateNotifier<CoursesState> {
   }
 
   Future<void> getDetails(String id) async {
+    // Check if we're refreshing the same course or switching to a different one
+    final isSameCourse = state.detailsCourseId == id;
+
+    // Only clear data if switching to a different course
+    // When refreshing the same course, keep existing data visible
     state = state.copyWith(
       loadingDetails: true,
       clearDetailsError: true,
@@ -611,12 +733,16 @@ class CourseViewModel extends StateNotifier<CoursesState> {
       clearLecturesError: true,
       clearClassesError: true,
       clearMockTestsError: true,
-      subjects: const [],
-      lecturers: const [],
-      materials: const [],
-      lectures: const [],
-      classes: const [],
-      mockTests: const [],
+      // Only clear data lists when loading a different course
+      subjects: isSameCourse ? null : const [],
+      lecturers: isSameCourse ? null : const [],
+      materials: isSameCourse ? null : const [],
+      lectures: isSameCourse ? null : const [],
+      classes: isSameCourse ? null : const [],
+      mockTests: isSameCourse ? null : const [],
+      // Preserve details when refreshing same course, clear when switching
+      details: isSameCourse ? state.details : null,
+      lastDetailsCourseId: id,
     );
     final response = await _service.details(id);
     // Debug: print raw response for course details API
@@ -740,6 +866,10 @@ class CourseViewModel extends StateNotifier<CoursesState> {
               .toList();
         }
 
+        // When refreshing same course, prefer new data if available,
+        // otherwise keep existing cached data to avoid showing empty state
+        final isSameCourseRefresh = state.detailsCourseId == id;
+
         final nextState = state.copyWith(
           loadingDetails: false,
           details: payload,
@@ -761,12 +891,25 @@ class CourseViewModel extends StateNotifier<CoursesState> {
           clearLecturesError: true,
           clearClassesError: true,
           clearMockTestsError: true,
-          subjects: subjectsList,
-          lecturers: lecturersList,
-          materials: sortedMaterials,
-          lectures: sortedLectures,
-          classes: classesList,
-          mockTests: mockTestsList,
+          // Use new data if available, keep cached if API returns empty during refresh
+          subjects: subjectsList.isNotEmpty
+              ? subjectsList
+              : (isSameCourseRefresh ? state.subjects : subjectsList),
+          lecturers: lecturersList.isNotEmpty
+              ? lecturersList
+              : (isSameCourseRefresh ? state.lecturers : lecturersList),
+          materials: sortedMaterials.isNotEmpty
+              ? sortedMaterials
+              : (isSameCourseRefresh ? state.materials : sortedMaterials),
+          lectures: sortedLectures.isNotEmpty
+              ? sortedLectures
+              : (isSameCourseRefresh ? state.lectures : sortedLectures),
+          classes: classesList.isNotEmpty
+              ? classesList
+              : (isSameCourseRefresh ? state.classes : classesList),
+          mockTests: mockTestsList.isNotEmpty
+              ? mockTestsList
+              : (isSameCourseRefresh ? state.mockTests : mockTestsList),
         );
 
         state = nextState;
@@ -972,10 +1115,11 @@ class CourseViewModel extends StateNotifier<CoursesState> {
     state = materialsRes.fold(
       (failure) {
         debugPrint('materialsByCourse($courseId) failed: ${failure.message}');
+        // Keep existing materials on failure instead of clearing
         return state.copyWith(
           loadingMaterials: false,
           materialsError: failure,
-          materials: const [],
+          // Don't clear materials on error - keep cached data
         );
       },
       (materialsList) {
@@ -1014,10 +1158,11 @@ class CourseViewModel extends StateNotifier<CoursesState> {
 
     final subjects = state.subjects;
     if (subjects.isEmpty) {
+      // Keep existing lectures if we have them, don't clear during refresh
       state = state.copyWith(
         loadingLectures: false,
         lecturesError: null,
-        lectures: const [],
+        // Don't set lectures to empty - keep existing cached data
       );
       return;
     }

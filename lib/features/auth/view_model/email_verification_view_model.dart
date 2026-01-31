@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
 import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
+
+import '../../../core/methods/app_methods.dart';
+import 'auth_state.dart';
 
 class EmailVerificationState {
   final GlobalKey<FormState> formKey;

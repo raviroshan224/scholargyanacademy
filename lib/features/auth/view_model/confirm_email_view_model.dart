@@ -49,7 +49,7 @@ class ConfirmEmailViewModel {
       bool isSuccess = false;
       res.fold(
         (failure) {
-          final fieldErrors = failure.fieldErrors;
+          final fieldErrors = failure?.fieldErrors;
           if (fieldErrors != null && fieldErrors.isNotEmpty) {
             fieldErrors.forEach((key, value) {
               if (value.isNotEmpty) {
@@ -60,7 +60,7 @@ class ConfirmEmailViewModel {
 
           AppMethods.showCustomSnackBar(
             context: context,
-            message: failure.message,
+            message: failure!.message,
             isError: true,
           );
         },

@@ -1,4 +1,4 @@
-import 'package:scholarsgyanacademy/features/auth/model/auth_models.dart';
+import '../model/auth_models.dart';
 
 enum AuthStatus {
   initial,

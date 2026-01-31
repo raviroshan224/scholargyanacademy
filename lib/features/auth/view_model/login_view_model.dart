@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/core/core.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
 import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
-import 'package:scholarsgyanacademy/features/before_auth/presentation/pages/course_selection.dart';
-import 'package:scholarsgyanacademy/features/dashboard/presentation/pages/dashboard.dart';
+
+import '../../../core/methods/app_methods.dart';
+import '../../before_auth/presentation/pages/course_selection.dart';
+import '../../dashboard/presentation/pages/dashboard.dart';
+import 'auth_state.dart';
 
 final loginViewModelProvider = Provider<LoginViewModel>((Ref ref) {
   return LoginViewModel(ref);

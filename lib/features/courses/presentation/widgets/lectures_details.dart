@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/config/services/remote_services/api_endpoints.dart';
-import 'package:scholarsgyanacademy/config/services/secure_storage_provider.dart';
 
+import '../../../../config/services/remote_services/api_endpoints.dart';
+import '../../../../config/services/secure_storage_provider.dart';
 import '../../../../core/core.dart';
 import '../../model/course_models.dart';
 import '../../view_model/course_view_model.dart';
 import '../pages/video_player_page.dart';
+import 'lecture_details_bottom_sheet.dart';
 
 Future<void> _openLecture(
   BuildContext context,
@@ -48,7 +49,10 @@ Future<void> _openLecture(
           builder: (_) => VideoPlayerPage(
             url: watchUrl,
             title: lecture.name,
+            lectureId: lecture.id,
             headers: playbackHeaders,
+            thumbnailUrl: lecture.thumbnailUrl,
+            processingStatus: lecture.processingStatus,
           ),
         ),
       );
@@ -65,6 +69,10 @@ class LecturesDetails extends ConsumerWidget {
     final lectures = state.lectures;
     final subjects = state.subjects;
     final bool isEnrolled = state.isEnrolled;
+
+    if (!isEnrolled) {
+      return const Center(child: CText('Enroll to access lectures'));
+    }
 
     if (state.loadingLectures && lectures.isEmpty) {
       return const Center(child: CircularProgressIndicator());
@@ -116,8 +124,6 @@ class LecturesDetails extends ConsumerWidget {
           : 'Subject $key';
       groups.add(_LectureGroup(title: title, lectures: value));
     });
-
-    // Use helper _openLecture to reduce rebuild allocations
 
     return ListView.builder(
       scrollDirection: Axis.vertical,
@@ -177,8 +183,25 @@ class LecturesDetails extends ConsumerWidget {
                           key: ValueKey(lecture.id ?? i),
                           lecture: lecture,
                           isEnrolled: isEnrolled,
-                          onOpen: () =>
-                              _openLecture(context, ref, lecture, isEnrolled),
+                          onOpen: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (_) => LectureDetailsBottomSheet(
+                                lecture: lecture,
+                                onJoinClass: () {
+                                  Navigator.pop(context); // Close the sheet
+                                  _openLecture(
+                                    context,
+                                    ref,
+                                    lecture,
+                                    isEnrolled,
+                                  );
+                                },
+                              ),
+                            );
+                          },
                         );
                       },
                     ),
@@ -288,86 +311,97 @@ class _LectureCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
-              ),
-              child: AspectRatio(
-                aspectRatio: 1.0,
-                child: lecture.thumbnailUrl != null
-                    ? CustomCachedNetworkImage(
-                        imageUrl: lecture.thumbnailUrl!,
-                        fitStatus: BoxFit.cover,
-                      )
-                    : Container(
-                        color: AppColors.primary.withOpacity(0.08),
-                        child: const Center(
-                          child: Icon(
-                            Icons.play_circle_fill,
-                            size: 36,
-                            color: AppColors.primary,
+            // Image takes flexible space with 16:9 aspect ratio
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: (lecture.coverImageUrl ?? lecture.thumbnailUrl) != null
+                      ? CustomCachedNetworkImage(
+                          imageUrl:
+                              (lecture.coverImageUrl ?? lecture.thumbnailUrl)!,
+                          fitStatus: BoxFit.cover,
+                        )
+                      : Container(
+                          color: AppColors.primary.withOpacity(0.08),
+                          child: const Center(
+                            child: Icon(
+                              Icons.play_circle_fill,
+                              size: 36,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
+                ),
+              ),
+            ),
+            // Content takes remaining space
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Title
+                    Flexible(
+                      child: CText(
+                        lecture.name,
+                        type: TextType.bodySmall,
+                        fontWeight: FontWeight.w600,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: CText(
-                lecture.name,
-                type: TextType.bodySmall,
-                fontWeight: FontWeight.w600,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: AppColors.primary.withOpacity(0.12),
-                    child:
-                        (lecture.lecturerName != null &&
-                            lecture.lecturerName!.isNotEmpty)
-                        ? CText(
-                            lecture.lecturerName!.substring(0, 1),
-                            type: TextType.bodySmall,
-                            color: AppColors.primary,
-                          )
-                        : const Icon(
-                            Icons.person,
-                            color: AppColors.primary,
-                            size: 12,
+                    ),
+                    // Lecturer row
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 10,
+                          backgroundColor: AppColors.primary.withOpacity(0.12),
+                          child:
+                              (lecture.lecturerName != null &&
+                                  lecture.lecturerName!.isNotEmpty)
+                              ? CText(
+                                  lecture.lecturerName!.substring(0, 1),
+                                  type: TextType.labelSmall,
+                                  color: AppColors.primary,
+                                )
+                              : const Icon(
+                                  Icons.person,
+                                  color: AppColors.primary,
+                                  size: 10,
+                                ),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: CText(
+                            lecture.lecturerName ?? 'NA',
+                            type: TextType.labelSmall,
+                            color: AppColors.gray700,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: CText(
-                      lecture.lecturerName ?? 'Unknown',
-                      type: TextType.bodySmall,
-                      color: AppColors.gray700,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                        ),
+                        Icon(
+                          isEnrolled
+                              ? Icons.play_arrow_rounded
+                              : Icons.lock_outline,
+                          size: 18,
+                          color: isEnrolled
+                              ? AppColors.primary
+                              : AppColors.gray400,
+                        ),
+                      ],
                     ),
-                  ),
-                  IconButton(
-                    iconSize: 20,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: Icon(
-                      isEnrolled
-                          ? Icons.play_arrow_rounded
-                          : Icons.lock_outline,
-                    ),
-                    color: isEnrolled ? AppColors.primary : AppColors.gray400,
-                    onPressed: onOpen,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

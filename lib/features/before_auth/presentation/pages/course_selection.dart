@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
-import 'package:scholarsgyanacademy/features/dashboard/presentation/pages/dashboard.dart';
 
 import '../../../../core/core.dart';
+import '../../../auth/view_model/providers/auth_providers.dart';
+import '../../../dashboard/presentation/pages/dashboard.dart';
 import '../../../profile/presentation/providers/favorite_category_notifier.dart';
 import '../../../profile/presentation/providers/providers.dart';
 import '../widgets/course_selection_expansion.dart';

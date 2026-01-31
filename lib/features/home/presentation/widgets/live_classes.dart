@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/core.dart';
+import '../../../../core/utils/date_time_helper.dart';
+import '../../../courses/presentation/pages/meeting_page_v2.dart';
+import '../../../courses/view_model/live_class_join_view_model.dart';
 import '../../models/homepage_models.dart' as home_models;
 
-class LiveClasses extends StatelessWidget {
+class LiveClasses extends ConsumerWidget {
   const LiveClasses({
     super.key,
     required this.liveClasses,
     this.isLoading = false,
+    this.isUpcoming = false,
   });
 
   final List<home_models.LiveClass> liveClasses;
   final bool isLoading;
+  final bool isUpcoming;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -31,8 +36,6 @@ class LiveClasses extends StatelessWidget {
       );
     }
 
-    final formatter = DateFormat('MMM d, h:mm a');
-
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -41,7 +44,7 @@ class LiveClasses extends StatelessWidget {
       itemBuilder: (context, index) {
         final liveClass = liveClasses[index];
         final scheduledText = liveClass.scheduledAt != null
-            ? formatter.format(liveClass.scheduledAt!.toLocal())
+            ? DateTimeHelper.formatForUI(liveClass.scheduledAt!.toLocal())
             : 'Schedule to be announced';
 
         return Container(
@@ -91,9 +94,36 @@ class LiveClasses extends StatelessWidget {
 
                 // Join Now Button
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: isUpcoming
+                      ? null
+                      : () async {
+                          if (liveClass.id != null) {
+                            final notifier = ref.read(
+                              liveClassJoinViewModelProvider.notifier,
+                            );
+                            final token = await notifier.joinLiveClass(
+                              liveClass.id!,
+                            );
+
+                            if (token != null && context.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MeetingPageV2(
+                                    token: token,
+                                    classId: liveClass.id!,
+                                  ),
+                                ),
+                              ).then((_) {
+                                notifier.reset();
+                              });
+                            }
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
+                    backgroundColor: isUpcoming
+                        ? AppColors.gray300
+                        : AppColors.secondary,
                     foregroundColor: AppColors.white,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(
@@ -104,8 +134,8 @@ class LiveClasses extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const CText(
-                    'Join Now',
+                  child: CText(
+                    isUpcoming ? 'Upcoming' : 'Join Now',
                     type: TextType.bodySmall,
                     fontWeight: FontWeight.w600,
                     color: AppColors.white,

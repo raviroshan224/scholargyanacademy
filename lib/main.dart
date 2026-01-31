@@ -1,21 +1,21 @@
-
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // <-- IMPORTANT (SystemChrome import)
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scholarsgyanacademy/config/services/navigation_service.dart';
-import 'package:scholarsgyanacademy/config/themes/app_themes.dart';
-import 'package:scholarsgyanacademy/features/auth/view/pages/login_page.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/auth_state.dart';
-import 'package:scholarsgyanacademy/features/auth/view_model/providers/auth_providers.dart';
-import 'package:scholarsgyanacademy/features/dashboard/presentation/pages/dashboard.dart';
 import 'package:scholarsgyanacademy/server_config/config.dart';
 import 'package:upgrader/upgrader.dart';
 
 import 'config/dependencies/dependency_injection.dart';
 import 'config/dependencies/notification/local_notification_manager.dart';
 import 'config/local_db/hive/hive_setup.dart';
-
-
+import 'config/services/navigation_service.dart';
+import 'config/themes/app_themes.dart';
+import 'core/services/zoom_init.dart';
+import 'features/auth/view/pages/login_page.dart';
+import 'features/auth/view_model/auth_state.dart';
+import 'features/auth/view_model/providers/auth_providers.dart';
+import 'features/dashboard/presentation/pages/dashboard.dart';
+import 'firebase_options.dart';
 import 'network_layer/src/api_config.dart';
 
 Future<void> main() async {
@@ -25,9 +25,10 @@ Future<void> main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      statusBarColor: Colors.white,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.light,
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness:
+          Brightness.dark, // For Android (dark icons on light bg)
+      statusBarBrightness: Brightness.light, // For iOS (dark icons on light bg)
       systemNavigationBarColor: Colors.transparent,
       systemNavigationBarDividerColor: Colors.transparent,
     ),
@@ -44,7 +45,7 @@ Future<void> main() async {
 Future<void> setup() async {
   ApiConfig().setApiAuthority(baseUrl: Config.OLP_SERVER);
 
-
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize local persistence (Hive)
   await HiveSetup.initializeHive();
@@ -100,19 +101,17 @@ class MyApp extends ConsumerWidget {
         builder: (context, ref, _) {
           final navService = ref.read(navigationServiceProvider);
 
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: "OLP",
-            theme: AppThemes.lightTheme,
-            navigatorKey: navService.navigatorKey,
-            home: _resolveHome(authState),
-            builder: (context, child) {
-              return SafeArea(
-                top: true,
-                bottom: true,
-                child: child ?? const SizedBox.shrink(),
-              );
-            },
+          return ZoomVideoSdkProvider(
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: "OLP",
+              theme: AppThemes.lightTheme,
+              navigatorKey: navService.navigatorKey,
+              home: _resolveHome(authState),
+              builder: (context, child) {
+                return child ?? const SizedBox.shrink();
+              },
+            ),
           );
         },
       ),

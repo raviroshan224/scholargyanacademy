@@ -211,7 +211,7 @@ class _SavedCourseCard extends StatelessWidget {
                 bottomLeft: Radius.circular(12),
               ),
               child: CustomCachedNetworkImage(
-                imageUrl: course.courseImageUrl,
+                imageUrl: course.courseIconUrl ?? course.courseImageUrl,
                 size: Size(100, 100),
                 fitStatus: BoxFit.cover,
               ),

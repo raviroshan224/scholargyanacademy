@@ -257,7 +257,7 @@ class ExamCourseDetail {
         json['description'] ?? json['courseDescription'],
       ),
       thumbnailUrl: _string(
-        json['thumbnailUrl'] ??
+        json['courseIconUrl'] ??
             json['image'] ??
             json['courseImageUrl'] ??
             json['cover'],

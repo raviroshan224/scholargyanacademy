@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:scholarsgyanacademy/features/profile/presentation/pages/detail%20_pages/checkout_page.dart';
 
 import '../../../../core/core.dart';
 import '../../../courses/courses.dart';
+import '../../../profile/presentation/pages/detail _pages/checkout_page.dart';
 import '../widgets/explore_tab_bar.dart';
 
 final selectedTabIndexProvider = StateProvider<int>((Ref ref) => 0);
