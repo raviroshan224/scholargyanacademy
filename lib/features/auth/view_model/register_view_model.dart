@@ -26,7 +26,7 @@ class RegisterViewModel {
   bool get isLoading =>
       ref.read(authNotifierProvider).status == AuthStatus.loading;
 
-  Future<void> submitRegistration(BuildContext context) async {
+  Future<void>  submitRegistration(BuildContext context) async {
     final req = RegisterRequest(
       fullName: nameController.text.trim(),
       email: emailController.text.trim(),
