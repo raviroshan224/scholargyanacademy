@@ -151,6 +151,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               cardTitle: 'My Profile',
               isLoading: isLoading,
             ),
+            AppSpacing.verticalSpaceSmall,
+            ProfileTextRow(
+              onPressed: () {
+                if (isLoading) return;
+              },
+              icon: Icons.person_outline,
+              cardTitle: 'Delete account',
+              isLoading: isLoading,
+            ),
+            AppSpacing.verticalSpaceSmall,
             ProfileTextRow(
               onPressed: () async {
                 if (isLoading) return;
