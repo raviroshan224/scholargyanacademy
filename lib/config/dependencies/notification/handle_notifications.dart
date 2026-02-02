@@ -13,41 +13,52 @@ class HandleNotifications {
 
   ///8. Ways of sending notifications
   static Future<void> notificationMethods() async {
+    // Request notification permissions (especially important for iOS)
+    await firebaseMessaging.requestPermission();
+
     /// 8.1
-    tokenWiseNotification();
+    await tokenWiseNotification();
+
     /**
      * Method 2 : Topic Based
      * */
-    subscribeToTopic(topicName: defaultTopic);
+    // Only subscribe to topic after APNS token is available on iOS
+    if (!Platform.isIOS) {
+      subscribeToTopic(topicName: defaultTopic);
+    } else {
+      String? apnsToken = await firebaseMessaging.getAPNSToken();
+      if (apnsToken != null) {
+        subscribeToTopic(topicName: defaultTopic);
+      }
+    }
   }
 
   /// 8.1
-  static void tokenWiseNotification() {
+  static Future<void> tokenWiseNotification() async {
     /**
      *   Method 1 : Token Based
      */
 
-    /// For IOS
     if (Platform.isIOS) {
-      firebaseMessaging.getAPNSToken().then((String? token) => {
-        /// Token For IOS is in the token variable
-      });
+      // Wait for APNS token
+      String? apnsToken = await firebaseMessaging.getAPNSToken();
+      if (apnsToken == null) {
+        // Optionally, retry or log warning
+        print('[FCM] APNS token not available yet.');
+        return;
+      } else {
+        print('[FCM] APNS token: $apnsToken');
+      }
+      // Now safe to get FCM token
+      String? fcmToken = await firebaseMessaging.getToken();
+      print('[FCM] FCM token (iOS): $fcmToken');
+      // Send fcmToken to backend if needed
+    } else {
+      // Android: get FCM token directly
+      String? fcmToken = await firebaseMessaging.getToken();
+      print('[FCM] FCM token (Android): $fcmToken');
+      // Send fcmToken to backend if needed
     }
-
-    /// FCM  For Android
-    firebaseMessaging.getToken().then((String? token) {
-      /**
-       * Send this token to Backend server to receive notification token wise
-       * It is used to  target specific devices for receiving notifications.
-       * */
-
-      /** Note the token gets update
-       * The token is typically updated when the app is
-       * installed or
-       * re-installed, or when
-       * app is updated.
-       * */
-    });
   }
 
   /// 8.2

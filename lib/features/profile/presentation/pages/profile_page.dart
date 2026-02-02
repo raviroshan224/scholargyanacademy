@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../config/services/navigation_service.dart';
+import '../../../courses/presentation/widgets/payment_web_view.dart';
 import '../../../../core/core.dart';
 import '../../../auth/view_model/auth_state.dart';
 import '../../../auth/view_model/providers/auth_providers.dart';
@@ -153,13 +154,65 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             AppSpacing.verticalSpaceSmall,
             ProfileTextRow(
-              onPressed: () {
+              onPressed: () async {
                 if (isLoading) return;
+
+                // Show confirmation dialog
+                final shouldDelete = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const CText(
+                        'Confirm Delete',
+                        type: TextType.headlineSmall,
+                      ),
+                      content: const CText(
+                        'Are you sure you want to delete your account? This action cannot be undone.',
+                        type: TextType.bodyMedium,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const CText(
+                            'Cancel',
+                            type: TextType.bodyMedium,
+                            color: AppColors.gray600,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.failure,
+                          ),
+                          child: const CText(
+                            'Delete',
+                            type: TextType.bodyMedium,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                // If confirmed, open webview
+                if (shouldDelete == true) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PaymentWebViewPage(
+                        url: 'https://scholargyan.onecloudlab.com/api/v1/auth/me',
+                        title: 'Delete Account',
+                      ),
+                    ),
+                  );
+                }
               },
               icon: Icons.person_outline,
               cardTitle: 'Delete account',
               isLoading: isLoading,
             ),
+//
             AppSpacing.verticalSpaceSmall,
             ProfileTextRow(
               onPressed: () async {
