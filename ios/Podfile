@@ -51,4 +51,32 @@ post_install do |installer|
       config.build_settings['GCC_GENERATE_DEBUGGING_SYMBOLS'] = 'YES'
     end
   end
+  
+  # Fix ZoomTask.framework missing Info.plist keys
+  puts "🔧 Fixing ZoomTask.framework Info.plist files..."
+  
+  zoom_task_plists = [
+    'Pods/ZoomVideoSDK/zoom-video-sdk-iOS/ZoomTask.xcframework/ios-arm64/ZoomTask.framework/Info.plist',
+    'Pods/ZoomVideoSDK/zoom-video-sdk-iOS/ZoomTask.xcframework/ios-arm64_x86_64-simulator/ZoomTask.framework/Info.plist',
+    'Pods/ZoomVideoSDK/zoom-video-sdk-iOS/ZoomTask.xcframework/xros-arm64/ZoomTask.framework/Info.plist',
+    'Pods/ZoomVideoSDK/zoom-video-sdk-iOS/ZoomTask.xcframework/xros-arm64-simulator/ZoomTask.framework/Info.plist'
+  ]
+  
+  zoom_task_plists.each do |plist_path|
+    if File.exist?(plist_path)
+      # Check and add CFBundleShortVersionString
+      has_version = system("/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' '#{plist_path}' &>/dev/null")
+      unless has_version
+        system("/usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 2.4.0' '#{plist_path}'")
+      end
+      
+      # Check and add CFBundleVersion
+      has_build = system("/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' '#{plist_path}' &>/dev/null")
+      unless has_build
+        system("/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 1' '#{plist_path}'")
+      end
+      
+      puts "  ✅ Fixed: #{plist_path}"
+    end
+  end
 end

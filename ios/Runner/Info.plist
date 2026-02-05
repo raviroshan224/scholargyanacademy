@@ -68,6 +68,12 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app requires local network access for debugging and development purposes.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Scholarsgyanacademy needs access to your camera to enable video during live classes and video calls with teachers.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Scholarsgyanacademy needs access to your microphone to enable audio during live classes and voice communication with teachers.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Scholarsgyanacademy needs access to your photo library to allow you to upload profile pictures and share images.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_dartobservatory._tcp</string>

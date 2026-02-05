@@ -747,10 +747,9 @@ packages:
   flutter_zoom_videosdk:
     dependency: "direct main"
     description:
-      name: flutter_zoom_videosdk
-      sha256: "8f6dba6b5c910097aca7f3c582a11b10a6fb5def49fead745d837283b5f5ef52"
-      url: "https://pub.dev"
-    source: hosted
+      path: "flutter_zoom_videosdk-2.4.0"
+      relative: true
+    source: path
     version: "2.4.0"
   freezed_annotation:
     dependency: transitive
