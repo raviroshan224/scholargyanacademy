@@ -1,7 +1,7 @@
 class RegisterRequest {
   final String fullName;
   final String email;
-  final String mobileNumber;
+  final String? mobileNumber; // Optional field
   final String password;
   final String confirmPassword;
   final bool hasConfirmedToTerms;
@@ -9,20 +9,24 @@ class RegisterRequest {
   RegisterRequest({
     required this.fullName,
     required this.email,
-    required this.mobileNumber,
+    this.mobileNumber, // Optional parameter
     required this.password,
     required this.confirmPassword,
     required this.hasConfirmedToTerms,
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'fullName': fullName,
       'email': email,
-      'mobileNumber': mobileNumber,
       'password': password,
       'confirmPassword': confirmPassword,
       'hasConfirmedToTerms': hasConfirmedToTerms,
     };
+    // Only include mobileNumber if it's not null and not empty
+    if (mobileNumber != null && mobileNumber!.trim().isNotEmpty) {
+      data['mobileNumber'] = mobileNumber;
+    }
+    return data;
   }
 }

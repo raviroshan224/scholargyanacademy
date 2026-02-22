@@ -80,7 +80,7 @@ class _RegistrationPageState extends ConsumerState<RegistrationPage> {
                   ),
                   AppSpacing.verticalSpaceLarge,
                   CustTextField(
-                    hintText: AppStrings.contactNumber,
+                    hintText: 'Phone Number (Optional)',
                     prefixIcon: const Icon(Icons.phone),
                     controller: registerViewModel.phoneController,
                     keyboardType: TextInputType.phone,

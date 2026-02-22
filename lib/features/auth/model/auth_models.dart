@@ -151,6 +151,7 @@ class ProfileUpdateModel {
     final Map<String, dynamic> data = {};
     if (fullName != null) data['fullName'] = fullName;
     if (email != null) data['email'] = email;
+    // Include mobileNumber even if empty string (for PATCH to clear field)
     if (mobileNumber != null) data['mobileNumber'] = mobileNumber;
     return data;
   }

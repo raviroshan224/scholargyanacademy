@@ -50,10 +50,12 @@ class _EditPageState extends ConsumerState<EditPage> {
     }
 
     final editCtrl = ref.read(editCtrlProvider);
+    final phoneText = editCtrl.phoneController.text.trim();
     final request = ProfileUpdateModel(
       fullName: editCtrl.userNameController.text.trim(),
       email: editCtrl.emailController.text.trim(),
-      mobileNumber: editCtrl.phoneController.text.trim(),
+      // Send empty string instead of null for PATCH request
+      mobileNumber: phoneText.isEmpty ? '' : phoneText,
     );
 
     _isSubmitting = true;
@@ -271,7 +273,7 @@ class _EditPageState extends ConsumerState<EditPage> {
                   ),
                   AppSpacing.verticalSpaceMedium,
                   CustTextField(
-                    hintText: 'Contact Number',
+                    hintText: 'Phone Number (Optional)',
                     hintColor: AppColors.gray400,
                     prefixIcon: Padding(
                       padding: const EdgeInsets.all(16.0),

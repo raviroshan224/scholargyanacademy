@@ -25,13 +25,16 @@ class FieldValidators {
     return null; // Return null if the input is valid
   }
 
-  /// Contact number validator
+  /// Contact number validator (optional field)
   static String? validateContactNumber(String? value) {
-    // Add your validation logic here
-    String pattern =
-        r'^[0-9]{10}$'; // Regular expression for 10-digit phone number
+    // Phone number is optional - return null if empty
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    // If provided, validate format: must be 10 digits
+    String pattern = r'^[0-9]{10}$';
     RegExp regex = RegExp(pattern);
-    if (value == null || value.isEmpty || !regex.hasMatch(value)) {
+    if (!regex.hasMatch(value.trim())) {
       return 'Enter a valid 10-digit contact number';
     }
     return null; // Return null if the input is valid

@@ -27,10 +27,11 @@ class RegisterViewModel {
       ref.read(authNotifierProvider).status == AuthStatus.loading;
 
   Future<void>  submitRegistration(BuildContext context) async {
+    final phoneText = phoneController.text.trim();
     final req = RegisterRequest(
       fullName: nameController.text.trim(),
       email: emailController.text.trim(),
-      mobileNumber: phoneController.text.trim(),
+      mobileNumber: phoneText.isEmpty ? null : phoneText,
       password: passwordController.text,
       confirmPassword: confirmPasswordController.text,
       hasConfirmedToTerms: true,
