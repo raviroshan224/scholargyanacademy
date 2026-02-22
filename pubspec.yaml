@@ -82,6 +82,9 @@ dependencies:
   flutter_zoom_videosdk:
     path: ./flutter_zoom_videosdk-2.4.0
   webview_flutter: ^4.13.0
+  in_app_purchase: ^3.2.3
+  in_app_purchase_storekit: ^0.4.8
+  shared_preferences: ^2.5.4
 
 
 

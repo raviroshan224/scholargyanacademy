@@ -6,10 +6,11 @@ import 'package:readmore/readmore.dart';
 import '../../../../core/core.dart';
 import '../../../explore/explore.dart';
 import '../../courses.dart';
+import '../../model/course_models.dart';
 import '../../model/enrollment_models.dart';
 import '../../service/course_service.dart';
 import '../../view_model/course_view_model.dart';
-import '../widgets/enroll_with_esewa_button.dart';
+import 'package_payment_page.dart';
 
 class EnrolledCourseDetailsPage extends ConsumerStatefulWidget {
   final String courseId;
@@ -868,11 +869,38 @@ class _EnrolledCourseDetailsPageState
                         backgroundColor: AppColors.secondary,
                       )
                     else
-                      EnrollWithEsewaButton(
-                        courseId: widget.courseId,
-                        isEnrolled: false,
-                        promoCode: null,
-                        enrollType: 'course_enrollment',
+                      ReusableButton(
+                        text: 'Enroll Now',
+                        onPressed: () {
+                          final Map<String, dynamic> courseMap =
+                              Map<String, dynamic>.from(course!);
+                          if (!courseMap.containsKey('id') &&
+                              courseMap.containsKey('_id')) {
+                            courseMap['id'] = courseMap['_id'];
+                          } else if (!courseMap.containsKey('id')) {
+                            courseMap['id'] = widget.courseId;
+                          }
+
+                          final courseModel = CourseModel.fromJson(courseMap);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PackagePaymentPage(
+                                course: courseModel,
+                                enrollType: 'course_enrollment',
+                                courseId: widget.courseId,
+                              ),
+                            ),
+                          ).then((result) {
+                            if (result == true) {
+                              // Refresh details to update state to "enrolled"
+                              ref
+                                  .read(coursesViewModelProvider.notifier)
+                                  .getDetails(widget.courseId);
+                            }
+                          });
+                        },
+                        backgroundColor: AppColors.secondary,
                       ),
                   ],
                 ),

@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:either_dart/either.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+
+import '../../../../core/iap/entitlement_store.dart';
 
 import '../../../config/services/remote_services/errors/failure.dart';
 import '../../../config/services/remote_services/http_service_provider.dart';
@@ -744,6 +747,12 @@ class CourseViewModel extends StateNotifier<CoursesState> {
       details: isSameCourse ? state.details : null,
       lastDetailsCourseId: id,
     );
+    
+    bool hasLocalEntitlement = false;
+    if (Platform.isIOS) {
+       hasLocalEntitlement = await EntitlementStore().hasEntitlement(id);
+    }
+    
     final response = await _service.details(id);
     // Debug: print raw response for course details API
     try {
@@ -831,6 +840,10 @@ class CourseViewModel extends StateNotifier<CoursesState> {
         final classesList = _parseClassesFromPayload(payload);
         final mockTestsList = _parseMockTestsFromPayload(payload);
 
+        if (hasLocalEntitlement) {
+           payload['isEnrolled'] = true;
+           // Ensure map doesn't have an active string restriction or immutable state
+        }
         final bool isEnrolledUser = _payloadIndicatesEnrollment(payload);
 
         final updatedIds = <String>{...state.savedCourseIds};
