@@ -100,6 +100,8 @@ class _EnrollWithEsewaButtonState extends ConsumerState<EnrollWithEsewaButton> {
           ? AppColors.gray300
           : AppColors.secondary,
       onPressed: () async {
+        print('esewa ckicked');
+        print(widget.courseId);
         final authState = ref.read(authNotifierProvider);
         final userId = authState.user?.id ?? '';
 
@@ -117,7 +119,7 @@ class _EnrollWithEsewaButtonState extends ConsumerState<EnrollWithEsewaButton> {
         // Open redirect URL in external browser
         final launched = await launchUrl(
           uri,
-          mode: LaunchMode.externalNonBrowserApplication,
+          mode: LaunchMode.inAppBrowserView,
         );
 
         // Navigator.push(
