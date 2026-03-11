@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../core/core.dart';
 import '../../view_model/course_view_model.dart';
 
@@ -12,7 +13,7 @@ class LecturersInfo extends ConsumerWidget {
     final lecturers = state.lecturers;
 
     if (!state.isEnrolled) {
-      return const Center(child: CText('Enroll to access lecturers'));
+      return const Center(child: CText('No lecturers available right now'));
     }
 
     if (state.loadingLecturers && lecturers.isEmpty) {
@@ -49,10 +50,7 @@ class LecturersInfo extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppColors.gray200,
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.gray200, width: 1),
             ),
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -68,18 +66,23 @@ class LecturersInfo extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CText(lect.fullName,
-                          type: TextType.titleMedium, color: AppColors.black),
+                      CText(
+                        lect.fullName,
+                        type: TextType.titleMedium,
+                        color: AppColors.black,
+                      ),
                       const SizedBox(height: 4),
                       if ((lect.subjects ?? '').isNotEmpty)
-                        CText(lect.subjects!,
-                            type: TextType.bodySmall,
-                            color: AppColors.gray600,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis),
+                        CText(
+                          lect.subjects!,
+                          type: TextType.bodySmall,
+                          color: AppColors.gray600,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),

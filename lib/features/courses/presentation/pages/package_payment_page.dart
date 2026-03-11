@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +9,6 @@ import '../../../../core/iap/paywall_page.dart';
 import '../../../../core/widgets/text/custom_text.dart';
 import '../../../auth/view_model/providers/auth_providers.dart';
 import '../../model/course_models.dart';
-import '../widgets/enroll_with_esewa_button.dart';
 
 class PackagePaymentPage extends ConsumerStatefulWidget {
   final CourseModel course;
@@ -268,43 +265,43 @@ class _PackagePaymentPageState extends ConsumerState<PackagePaymentPage> {
             ),
             const SizedBox(height: 12),
 
-            if (Platform.isIOS) ...[
-              // iOS Flow: In-App Purchases
-              InkWell(
-                onTap: _handleIapEnrollment,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.apple, color: Colors.white, size: 28),
-                      SizedBox(width: 8),
-                      CText(
-                        'Pay with Apple',
-                        type: TextType.bodyLarge,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            // if (Platform.isIOS) ...[
+            //   // iOS Flow: In-App Purchases
+            //   InkWell(
+            //     onTap: _handleIapEnrollment,
+            //     borderRadius: BorderRadius.circular(12),
+            //     child: Container(
+            //       width: double.infinity,
+            //       padding: const EdgeInsets.symmetric(vertical: 16),
+            //       decoration: BoxDecoration(
+            //         color: Colors.black,
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       child: Row(
+            //         mainAxisAlignment: MainAxisAlignment.center,
+            //         children: const [
+            //           Icon(Icons.apple, color: Colors.white, size: 28),
+            //           SizedBox(width: 8),
+            //           CText(
+            //             'Pay with Apple',
+            //             type: TextType.bodyLarge,
+            //             color: Colors.white,
+            //             fontWeight: FontWeight.bold,
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ],
             // Android Flow: eSewa
             SizedBox(height: 20),
-            EnrollWithEsewaButton(
-              courseId: widget.courseId,
-              isEnrolled: false,
-              promoCode: null,
-              enrollType: 'course_enrollment',
-            ),
 
+            // EnrollWithEsewaButton(
+            //   courseId: widget.courseId,
+            //   isEnrolled: false,
+            //   promoCode: null,
+            //   enrollType: 'course_enrollment',
+            // ),
             if (_isProcessing)
               const Padding(
                 padding: EdgeInsets.only(top: 24.0),

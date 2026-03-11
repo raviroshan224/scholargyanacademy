@@ -181,7 +181,7 @@ class AvailableList extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           CText(
-                            _formatPrice(exam),
+                            'Free',
                             type: TextType.bodyMedium,
                             fontWeight: FontWeight.w600,
                             color: (exam.isFree ?? false)

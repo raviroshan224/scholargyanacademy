@@ -36,7 +36,8 @@ class HomeCourseCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bool isFree = enrollmentCost == 0;
-    final bool hasValidDiscount = hasOffer == true &&
+    final bool hasValidDiscount =
+        hasOffer == true &&
         enrollmentCost != null &&
         discountedPrice != null &&
         enrollmentCost! > discountedPrice!;
@@ -57,8 +58,9 @@ class HomeCourseCard extends ConsumerWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12),
+                  ),
                   child: SizedBox(
                     height: 140,
                     width: double.infinity,
@@ -69,15 +71,11 @@ class HomeCourseCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if (hasValidDiscount)
-                  _badge('${_discount()}% OFF', const Color(0xFFEA4335)),
-                if (isFree) _badge('FREE', const Color(0xFF0F9D58)),
+                // if (hasValidDiscount)
+                // _badge('${_discount()}% OFF', const Color(0xFFEA4335)),
+                // _badge('FREE', const Color(0xFF0F9D58)),
                 if (courseId != null)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: _bookmark(ref, context),
-                  ),
+                  Positioned(top: 8, right: 8, child: _bookmark(ref, context)),
               ],
             ),
 
@@ -114,7 +112,15 @@ class HomeCourseCard extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  _price(isFree, hasValidDiscount),
+                  Text(
+                    'Explore',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F9D58),
+                    ),
+                  ),
+                  // _price(true, hasValidDiscount),
                 ],
               ),
             ),
@@ -132,8 +138,10 @@ class HomeCourseCard extends ConsumerWidget {
       left: 8,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration:
-            BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(4),
+        ),
         child: Text(
           text,
           style: const TextStyle(
@@ -157,8 +165,10 @@ class HomeCourseCard extends ConsumerWidget {
             },
       child: Container(
         padding: const EdgeInsets.all(6),
-        decoration:
-            const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
         child: Icon(
           isSaved ? Icons.bookmark : Icons.bookmark_border,
           size: 18,
@@ -212,7 +222,8 @@ class HomeCourseCard extends ConsumerWidget {
   int _discount() {
     if (enrollmentCost == null ||
         discountedPrice == null ||
-        enrollmentCost == 0) return 0;
+        enrollmentCost == 0)
+      return 0;
     return (((enrollmentCost! - discountedPrice!) / enrollmentCost!) * 100)
         .round();
   }

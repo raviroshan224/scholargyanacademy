@@ -6,11 +6,9 @@ import 'package:readmore/readmore.dart';
 import '../../../../core/core.dart';
 import '../../../explore/explore.dart';
 import '../../courses.dart';
-import '../../model/course_models.dart';
 import '../../model/enrollment_models.dart';
 import '../../service/course_service.dart';
 import '../../view_model/course_view_model.dart';
-import 'package_payment_page.dart';
 
 class EnrolledCourseDetailsPage extends ConsumerStatefulWidget {
   final String courseId;
@@ -792,116 +790,116 @@ class _EnrolledCourseDetailsPageState
                 child: Row(
                   children: [
                     // Enrollment fee on the left
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CText(
-                            'Enrollment Fee',
-                            type: TextType.bodySmall,
-                            color: AppColors.gray600,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              if (course != null) ...[
-                                if (course['hasOffer'] == true &&
-                                    course['enrollmentCost'] != null &&
-                                    course['discountedPrice'] != null &&
-                                    (course['enrollmentCost'] as num) >
-                                        (course['discountedPrice'] as num)) ...[
-                                  // Discounted Price
-                                  CText(
-                                    'Rs. ${NumberFormat.decimalPattern().format(course['discountedPrice'])}',
-                                    type: TextType.headlineSmall,
-                                    color: AppColors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  // Original Price (Strikethrough)
-                                  Text(
-                                    'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}',
-                                    style: const TextStyle(
-                                      fontSize:
-                                          12.0, // Assuming bodySmall size, adjust if needed
-                                      color: Color.fromRGBO(123, 138, 153, 1),
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                                  ),
-                                ] else ...[
-                                  // Regular Price
-                                  CText(
-                                    (course['enrollmentCost'] != null &&
-                                            (course['enrollmentCost'] is num))
-                                        ? ((course['enrollmentCost'] as num) ==
-                                                  0
-                                              ? 'Free'
-                                              : 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}')
-                                        : 'Rs. 0',
-                                    type: TextType.headlineSmall,
-                                    color: AppColors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ],
-                              ] else ...[
-                                const CText(
-                                  'Rs. 0',
-                                  type: TextType.headlineSmall,
-                                  color: AppColors.black,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     mainAxisSize: MainAxisSize.min,
+                    //     children: [
+                    //       CText(
+                    //         'Enrollment Fee',
+                    //         type: TextType.bodySmall,
+                    //         color: AppColors.gray600,
+                    //       ),
+                    //       const SizedBox(height: 4),
+                    //       Row(
+                    //         children: [
+                    //           if (course != null) ...[
+                    //             if (course['hasOffer'] == true &&
+                    //                 course['enrollmentCost'] != null &&
+                    //                 course['discountedPrice'] != null &&
+                    //                 (course['enrollmentCost'] as num) >
+                    //                     (course['discountedPrice'] as num)) ...[
+                    //               // Discounted Price
+                    //               CText(
+                    //                 'Rs. ${NumberFormat.decimalPattern().format(course['discountedPrice'])}',
+                    //                 type: TextType.headlineSmall,
+                    //                 color: AppColors.black,
+                    //                 fontWeight: FontWeight.bold,
+                    //               ),
+                    //               const SizedBox(width: 4),
+                    //               // Original Price (Strikethrough)
+                    //               Text(
+                    //                 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}',
+                    //                 style: const TextStyle(
+                    //                   fontSize:
+                    //                       12.0, // Assuming bodySmall size, adjust if needed
+                    //                   color: Color.fromRGBO(123, 138, 153, 1),
+                    //                   decoration: TextDecoration.lineThrough,
+                    //                 ),
+                    //               ),
+                    //             ] else ...[
+                    //               // Regular Price
+                    //               CText(
+                    //                 (course['enrollmentCost'] != null &&
+                    //                         (course['enrollmentCost'] is num))
+                    //                     ? ((course['enrollmentCost'] as num) ==
+                    //                               0
+                    //                           ? 'Free'
+                    //                           : 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}')
+                    //                     : 'Rs. 0',
+                    //                 type: TextType.headlineSmall,
+                    //                 color: AppColors.black,
+                    //                 fontWeight: FontWeight.bold,
+                    //               ),
+                    //             ],
+                    //           ] else ...[
+                    //             const CText(
+                    //               'Rs. 0',
+                    //               type: TextType.headlineSmall,
+                    //               color: AppColors.black,
+                    //             ),
+                    //           ],
+                    //         ],
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 12),
                     // Enroll button on the right
-                    if (((course != null &&
-                            course['hasOffer'] == true &&
-                            course['discountedPrice'] != null)
-                        ? ((course['discountedPrice'] as num) <= 0)
-                        : (((course?['enrollmentCost'] as num?) ?? 0) <= 0)))
-                      ReusableButton(
-                        text: 'Enroll Now',
-                        onPressed: _handleFreeEnrollment,
-                        backgroundColor: AppColors.secondary,
-                      )
-                    else
-                      ReusableButton(
-                        text: 'Enroll Now',
-                        onPressed: () {
-                          final Map<String, dynamic> courseMap =
-                              Map<String, dynamic>.from(course!);
-                          if (!courseMap.containsKey('id') &&
-                              courseMap.containsKey('_id')) {
-                            courseMap['id'] = courseMap['_id'];
-                          } else if (!courseMap.containsKey('id')) {
-                            courseMap['id'] = widget.courseId;
-                          }
-
-                          final courseModel = CourseModel.fromJson(courseMap);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PackagePaymentPage(
-                                course: courseModel,
-                                enrollType: 'course_enrollment',
-                                courseId: widget.courseId,
-                              ),
-                            ),
-                          ).then((result) {
-                            if (result == true) {
-                              // Refresh details to update state to "enrolled"
-                              ref
-                                  .read(coursesViewModelProvider.notifier)
-                                  .getDetails(widget.courseId);
-                            }
-                          });
-                        },
-                        backgroundColor: AppColors.secondary,
-                      ),
+                    // if (((course != null &&
+                    //         course['hasOffer'] == true &&
+                    //         course['discountedPrice'] != null)
+                    //     ? ((course['discountedPrice'] as num) <= 0)
+                    //     : (((course?['enrollmentCost'] as num?) ?? 0) <= 0)))
+                    //   ReusableButton(
+                    //     text: 'Enroll Now',
+                    //     onPressed: _handleFreeEnrollment,
+                    //     backgroundColor: AppColors.secondary,
+                    //   )
+                    // else
+                    //   ReusableButton(
+                    //     text: 'Enroll Now',
+                    //     onPressed: () {
+                    //       final Map<String, dynamic> courseMap =
+                    //           Map<String, dynamic>.from(course!);
+                    //       if (!courseMap.containsKey('id') &&
+                    //           courseMap.containsKey('_id')) {
+                    //         courseMap['id'] = courseMap['_id'];
+                    //       } else if (!courseMap.containsKey('id')) {
+                    //         courseMap['id'] = widget.courseId;
+                    //       }
+                    //
+                    //       final courseModel = CourseModel.fromJson(courseMap);
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (_) => PackagePaymentPage(
+                    //             course: courseModel,
+                    //             enrollType: 'course_enrollment',
+                    //             courseId: widget.courseId,
+                    //           ),
+                    //         ),
+                    //       ).then((result) {
+                    //         if (result == true) {
+                    //           // Refresh details to update state to "enrolled"
+                    //           ref
+                    //               .read(coursesViewModelProvider.notifier)
+                    //               .getDetails(widget.courseId);
+                    //         }
+                    //       });
+                    //     },
+                    //     backgroundColor: AppColors.secondary,
+                    //   ),
                   ],
                 ),
               ),

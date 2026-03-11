@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/core.dart';
+
 import '../../../../config/services/remote_services/http_service_provider.dart';
+import '../../../../core/core.dart';
 import '../../model/course_models.dart';
 import '../../view_model/course_view_model.dart';
 import '../pages/pdf_viewer_page.dart';
@@ -18,7 +19,7 @@ class MaterialsInfo extends ConsumerWidget {
     final bool isEnrolled = state.isEnrolled;
 
     if (!isEnrolled) {
-      return const Center(child: CText('Enroll to access materials'));
+      return const Center(child: CText('Empty access materials'));
     }
 
     if (state.loadingMaterials && materials.isEmpty) {
@@ -43,7 +44,7 @@ class MaterialsInfo extends ConsumerWidget {
     }
 
     final subjectNameById = {
-      for (final subject in subjects) subject.id: subject.subjectName
+      for (final subject in subjects) subject.id: subject.subjectName,
     };
     const uncategorizedKey = '_uncategorized';
     final Map<String, List<CourseMaterialModel>> grouped = {
@@ -62,8 +63,9 @@ class MaterialsInfo extends ConsumerWidget {
     for (final subject in subjects) {
       final items = grouped.remove(subject.id);
       if (items != null && items.isNotEmpty) {
-        groups
-            .add(_MaterialGroup(title: subject.subjectName, materials: items));
+        groups.add(
+          _MaterialGroup(title: subject.subjectName, materials: items),
+        );
       }
     }
 
@@ -155,14 +157,12 @@ class MaterialsInfo extends ConsumerWidget {
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.gray300,
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.gray300, width: 1),
             ),
             child: Theme(
-              data:
-                  Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              data: Theme.of(
+                context,
+              ).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 backgroundColor: AppColors.white,
                 collapsedBackgroundColor: AppColors.white,
@@ -172,15 +172,19 @@ class MaterialsInfo extends ConsumerWidget {
                 collapsedShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
-                tilePadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                tilePadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 childrenPadding: const EdgeInsets.only(bottom: 8),
                 title: CText(group.title, type: TextType.titleMedium),
                 children: [
                   for (final material in group.materials)
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0, vertical: 2.0),
+                        horizontal: 12.0,
+                        vertical: 2.0,
+                      ),
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.gray100,
@@ -188,11 +192,15 @@ class MaterialsInfo extends ConsumerWidget {
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                          title: CText(material.materialTitle,
-                              type: TextType.bodyMedium,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis),
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          title: CText(
+                            material.materialTitle,
+                            type: TextType.bodyMedium,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -214,9 +222,11 @@ class MaterialsInfo extends ConsumerWidget {
                             ],
                           ),
                           trailing: IconButton(
-                            icon: Icon(isEnrolled
-                                ? Icons.download_rounded
-                                : Icons.lock_outline),
+                            icon: Icon(
+                              isEnrolled
+                                  ? Icons.download_rounded
+                                  : Icons.lock_outline,
+                            ),
                             color: isEnrolled
                                 ? AppColors.primary
                                 : AppColors.gray400,

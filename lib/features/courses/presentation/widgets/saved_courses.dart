@@ -129,8 +129,11 @@ class _SavedCoursesWidgetState extends ConsumerState<SavedCoursesWidget> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
           children: [
-            const Icon(Icons.bookmark_outline,
-                size: 48, color: AppColors.gray500),
+            const Icon(
+              Icons.bookmark_outline,
+              size: 48,
+              color: AppColors.gray500,
+            ),
             AppSpacing.verticalSpaceMedium,
             const CText(
               'No saved courses yet',
@@ -172,9 +175,7 @@ class _SavedCoursesWidgetState extends ConsumerState<SavedCoursesWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EnrolledCourseDetailsPage(
-          courseId: course.id,
-        ),
+        builder: (_) => EnrolledCourseDetailsPage(courseId: course.id),
       ),
     );
   }
@@ -249,12 +250,12 @@ class _SavedCourseCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    CText(
-                      'Rs. ${course.enrollmentCost ?? 0}',
-                      type: TextType.titleMedium,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    // CText(
+                    //   'Rs. ${course.enrollmentCost ?? 0}',
+                    //   type: TextType.titleMedium,
+                    //   color: AppColors.primary,
+                    //   fontWeight: FontWeight.w600,
+                    // ),
                   ],
                 ),
               ),

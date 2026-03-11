@@ -70,9 +70,9 @@ class LecturesDetails extends ConsumerWidget {
     final subjects = state.subjects;
     final bool isEnrolled = state.isEnrolled;
 
-    if (!isEnrolled) {
-      return const Center(child: CText('Enroll to access lectures'));
-    }
+    // if (!isEnrolled) {
+    //   return const Center(child: CText('Enroll to access lectures'));
+    // }
 
     if (state.loadingLectures && lectures.isEmpty) {
       return const Center(child: CircularProgressIndicator());

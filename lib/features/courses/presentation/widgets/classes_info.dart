@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+
 import '../../../../core/core.dart';
 import '../../model/course_models.dart';
 import '../../view_model/course_view_model.dart';
@@ -15,7 +16,7 @@ class ClassesInfo extends ConsumerWidget {
     // CRITICAL: Check enrollment first
     // Live classes API requires enrollment
     if (!state.isEnrolled) {
-      return const Center(child: CText('Enroll to access classes'));
+      return const Center(child: CText('Empty  classes'));
     }
 
     // For enrolled users: show classes from API
@@ -61,14 +62,16 @@ class ClassesInfo extends ConsumerWidget {
         final item = schedule[index];
         final title = item.title.isNotEmpty ? item.title : 'Class ${index + 1}';
         final description = item.description;
-        final startsAt = _formatDateTime(
+        final startsAt =
+            _formatDateTime(
               item.startTime ??
                   item.raw['startTime'] ??
                   item.raw['startsAt'] ??
                   item.raw['scheduledAt'],
             ) ??
             _extractStartLabel(item.raw);
-        final duration = item.durationLabel ??
+        final duration =
+            item.durationLabel ??
             item.raw['duration']?.toString() ??
             item.raw['durationText']?.toString();
 
@@ -95,8 +98,11 @@ class ClassesInfo extends ConsumerWidget {
                     AppSpacing.verticalSpaceTiny,
                     Row(
                       children: [
-                        const Icon(Icons.schedule,
-                            size: 16, color: AppColors.primary),
+                        const Icon(
+                          Icons.schedule,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 6),
                         CText(
                           startsAt,
@@ -110,8 +116,11 @@ class ClassesInfo extends ConsumerWidget {
                     AppSpacing.verticalSpaceTiny,
                     Row(
                       children: [
-                        const Icon(Icons.timelapse,
-                            size: 16, color: AppColors.primary),
+                        const Icon(
+                          Icons.timelapse,
+                          size: 16,
+                          color: AppColors.primary,
+                        ),
                         const SizedBox(width: 6),
                         CText(
                           duration,
@@ -156,7 +165,7 @@ class ClassesInfo extends ConsumerWidget {
       'startTimeText',
       'scheduleText',
       'startLabel',
-      'startsAtText'
+      'startsAtText',
     ];
     for (final key in keys) {
       final value = raw[key];
@@ -168,7 +177,8 @@ class ClassesInfo extends ConsumerWidget {
   }
 
   List<CourseClassModel> _fallbackClassesFromDetails(
-      Map<String, dynamic>? details) {
+    Map<String, dynamic>? details,
+  ) {
     if (details == null) return const <CourseClassModel>[];
     final List<CourseClassModel> results = [];
     void parse(dynamic source) {

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../../../../core/core.dart';
-import '../../../test/presentation/pages/detail_pages/test_details.dart';
 import '../../../test/models/mock_test_models.dart';
+import '../../../test/presentation/pages/detail_pages/test_details.dart';
 import '../../model/course_models.dart';
 import '../../view_model/course_view_model.dart';
 
@@ -26,7 +27,7 @@ class MockTestList extends ConsumerWidget {
     }
 
     if (!isEnrolled) {
-      return const Center(child: CText('Enroll to access mock tests'));
+      return const Center(child: CText('No mock tests'));
     }
 
     if (state.mockTestsError != null && tests.isEmpty) {
@@ -64,8 +65,9 @@ class MockTestList extends ConsumerWidget {
       itemCount: tests.length,
       itemBuilder: (context, index) {
         final test = tests[index];
-        final title =
-            test.title.isNotEmpty ? test.title : 'Mock Test ${index + 1}';
+        final title = test.title.isNotEmpty
+            ? test.title
+            : 'Mock Test ${index + 1}';
         final description = test.description;
         final totalQuestions = test.resolvedQuestionCount;
         final duration = test.durationLabel;
@@ -107,8 +109,10 @@ class MockTestList extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 8,
+                    ),
                     child: Container(
                       padding: const EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
@@ -127,11 +131,13 @@ class MockTestList extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CText(title,
-                            type: TextType.bodyMedium,
-                            color: AppColors.black,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis),
+                        CText(
+                          title,
+                          type: TextType.bodyMedium,
+                          color: AppColors.black,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         if ((description ?? '').isNotEmpty)
                           Padding(
                             padding: const EdgeInsets.only(top: 4.0),
@@ -147,15 +153,19 @@ class MockTestList extends ConsumerWidget {
                         Row(
                           children: [
                             if (totalQuestions != null)
-                              CText('$totalQuestions Questions',
-                                  type: TextType.bodySmall,
-                                  color: AppColors.gray500),
+                              CText(
+                                '$totalQuestions Questions',
+                                type: TextType.bodySmall,
+                                color: AppColors.gray500,
+                              ),
                             if (totalQuestions != null && duration != null)
                               const SizedBox(width: 12),
                             if (duration != null)
-                              CText(duration,
-                                  type: TextType.bodySmall,
-                                  color: AppColors.gray500),
+                              CText(
+                                duration,
+                                type: TextType.bodySmall,
+                                color: AppColors.gray500,
+                              ),
                           ],
                         ),
                       ],
@@ -163,8 +173,9 @@ class MockTestList extends ConsumerWidget {
                   ),
                   AppSpacing.horizontalSpaceSmall,
                   ReusableButton(
-                    backgroundColor:
-                        isEnrolled ? AppColors.secondary : AppColors.gray300,
+                    backgroundColor: isEnrolled
+                        ? AppColors.secondary
+                        : AppColors.gray300,
                     text: 'Start',
                     textColor: isEnrolled ? AppColors.white : AppColors.gray600,
                     onPressed: handleStart,
