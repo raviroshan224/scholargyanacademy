@@ -34,10 +34,7 @@ class RecommendedCourse extends StatelessWidget {
 
     return SizedBox(
       height: cardHeight,
-      child: CourseCard(
-        items: items,
-        onItemTap: onItemTap,
-      ),
+      child: CourseCard(items: items, onItemTap: onItemTap),
     );
   }
 
@@ -79,11 +76,7 @@ class RecommendedCourse extends StatelessWidget {
 }
 
 class CourseCard extends StatelessWidget {
-  const CourseCard({
-    super.key,
-    required this.items,
-    this.onItemTap,
-  });
+  const CourseCard({super.key, required this.items, this.onItemTap});
 
   final List<CourseCardData> items;
   final CourseCardTap? onItemTap;
@@ -108,9 +101,6 @@ class CourseCard extends StatelessWidget {
             imagePath: item.imageUrl ?? AppAssets.errorImage,
             courseId: item.courseId,
             isSaved: item.isSaved,
-            enrollmentCost: item.enrollmentCost,
-            discountedPrice: item.discountedPrice,
-            hasOffer: item.hasOffer,
             durationHours: item.durationHours,
           ),
         );
@@ -123,9 +113,7 @@ class CourseCard extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => EnrolledCourseDetailsPage(
-            courseId: item.courseId!,
-          ),
+          builder: (_) => EnrolledCourseDetailsPage(courseId: item.courseId!),
         ),
       );
     }

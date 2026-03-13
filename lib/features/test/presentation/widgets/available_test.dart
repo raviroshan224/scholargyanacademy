@@ -184,9 +184,7 @@ class AvailableList extends StatelessWidget {
                             'Free',
                             type: TextType.bodyMedium,
                             fontWeight: FontWeight.w600,
-                            color: (exam.isFree ?? false)
-                                ? AppColors.success
-                                : AppColors.primary,
+                            color: AppColors.success,
                           ),
                           if (exam.validTo != null)
                             Padding(
@@ -225,16 +223,5 @@ class AvailableList extends StatelessWidget {
       chips.add(exam.status!);
     }
     return chips;
-  }
-
-  String _formatPrice(ExamListItem exam) {
-    if ((exam.isFree ?? false) || (exam.price ?? 0) == 0) {
-      return 'Free';
-    }
-    final price = exam.price ?? 0;
-    if (price == price.roundToDouble()) {
-      return 'Rs. ${price.toInt()}';
-    }
-    return 'Rs. ${price.toStringAsFixed(2)}';
   }
 }

@@ -23,10 +23,6 @@ class ApiEndPoints {
   static const String refreshTokenUrl = 'auth/refresh';
   static const String logout = 'auth/logout';
 
-  /// Payments Endpoints
-  static const String paymentsInitiate = 'payments/initiate';
-  static const String paymentsVerify = 'payments/verify';
-
   /// User Profile Endpoints
   static const String getCurrentUser = 'auth/me';
   static const String updateProfile = 'auth/me';

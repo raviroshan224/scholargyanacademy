@@ -1,8 +1,5 @@
 class MockTestListResponse {
-  const MockTestListResponse({
-    required this.tests,
-    this.meta,
-  });
+  const MockTestListResponse({required this.tests, this.meta});
 
   final List<MockTest> tests;
   final MockTestMeta? meta;
@@ -15,8 +12,8 @@ class MockTestListResponse {
       meta: metaJson is Map<String, dynamic>
           ? MockTestMeta.fromJson(metaJson)
           : metaJson is Map
-              ? MockTestMeta.fromJson(Map<String, dynamic>.from(metaJson))
-              : null,
+          ? MockTestMeta.fromJson(Map<String, dynamic>.from(metaJson))
+          : null,
     );
   }
 }
@@ -43,8 +40,9 @@ class MockTestMeta {
       page: _asInt(json['page'] ?? json['currentPage'] ?? json['pageNumber']),
       limit: _asInt(json['limit'] ?? json['perPage'] ?? json['pageSize']),
       total: _asInt(json['total'] ?? json['totalItems']),
-      totalPages:
-          _asInt(json['totalPages'] ?? json['totalPage'] ?? json['pages']),
+      totalPages: _asInt(
+        json['totalPages'] ?? json['totalPage'] ?? json['pages'],
+      ),
       hasNext: _asBool(json['hasNext'] ?? json['hasNextPage']),
       hasPrevious: _asBool(json['hasPrevious'] ?? json['hasPreviousPage']),
     );
@@ -103,16 +101,17 @@ class MockTest {
   final Map<String, dynamic>? extra;
 
   factory MockTest.fromJson(Map<String, dynamic> json) {
-    final subjectDistribution =
-        _asList(json['subjectDistribution']).map<Map<String, dynamic>>((item) {
-      if (item is Map<String, dynamic>) {
-        return item;
-      }
-      if (item is Map) {
-        return Map<String, dynamic>.from(item);
-      }
-      return <String, dynamic>{'value': item};
-    }).toList();
+    final subjectDistribution = _asList(json['subjectDistribution'])
+        .map<Map<String, dynamic>>((item) {
+          if (item is Map<String, dynamic>) {
+            return item;
+          }
+          if (item is Map) {
+            return Map<String, dynamic>.from(item);
+          }
+          return <String, dynamic>{'value': item};
+        })
+        .toList();
 
     return MockTest(
       id: _asString(json['id'] ?? json['mockTestId'] ?? json['testId']) ?? '',
@@ -124,41 +123,40 @@ class MockTest {
       subjectId: _asString(json['subjectId']),
       subjectName: _asString(json['subjectName']),
       subjectDistribution: subjectDistribution,
-      numberOfQuestions:
-          _asInt(json['numberOfQuestions'] ?? json['questionCount']),
+      numberOfQuestions: _asInt(
+        json['numberOfQuestions'] ?? json['questionCount'],
+      ),
       cost: _asDouble(json['cost'] ?? json['price']),
-      durationMinutes:
-          _asInt(json['durationMinutes'] ?? json['duration'] ?? json['time']),
-      passingPercentage:
-          _asDouble(json['passingPercentage'] ?? json['passPercentage']),
+      durationMinutes: _asInt(
+        json['durationMinutes'] ?? json['duration'] ?? json['time'],
+      ),
+      passingPercentage: _asDouble(
+        json['passingPercentage'] ?? json['passPercentage'],
+      ),
       attemptsAllowed: _asInt(json['attemptsAllowed'] ?? json['maxAttempts']),
       totalAttempts: _asInt(json['totalAttempts']),
-      averageScore:
-          _asDouble(json['averageScore'] ?? json['avgScore'] ?? json['score']),
+      averageScore: _asDouble(
+        json['averageScore'] ?? json['avgScore'] ?? json['score'],
+      ),
       attemptsUsed: _asInt(json['attemptsUsed'] ?? json['attemptCount']),
-      remainingAttempts:
-          _asInt(json['remainingAttempts'] ?? json['attemptsRemaining']),
-      maxAttemptsReached:
-          _asBool(json['maxAttemptsReached'] ?? json['isLockedOut']),
-      isFree: _asBool(json['isFree'] ?? json['free']) ??
-          (_asDouble(json['cost'] ?? json['price']) ?? 0) == 0,
-      isPurchased: _asBool(json['isPurchased'] ?? json['purchased']) ?? false,
-      canTakeTest:
-          _asBool(json['canTakeTest'] ?? json['canStart'] ?? json['allowed']) ??
-              false,
+      remainingAttempts: _asInt(
+        json['remainingAttempts'] ?? json['attemptsRemaining'],
+      ),
+      maxAttemptsReached: _asBool(
+        json['maxAttemptsReached'] ?? json['isLockedOut'],
+      ),
+      isFree: true, // All tests are now free
+      isPurchased: true, // All tests are accessible
+      canTakeTest: true, // All tests can be taken
       extra: json['extra'] is Map<String, dynamic>
           ? Map<String, dynamic>.from(json['extra'] as Map<String, dynamic>)
           : json['extra'] is Map
-              ? Map<String, dynamic>.from(json['extra'] as Map)
-              : null,
+          ? Map<String, dynamic>.from(json['extra'] as Map)
+          : null,
     );
   }
 
-  MockTest copyWith({
-    String? courseId,
-    bool? isPurchased,
-    bool? canTakeTest,
-  }) {
+  MockTest copyWith({String? courseId, bool? isPurchased, bool? canTakeTest}) {
     return MockTest(
       id: id,
       courseId: courseId ?? this.courseId,
@@ -211,11 +209,13 @@ String _parseCourseId(Map<String, dynamic> json) {
 List<MockTest> _parseTestList(dynamic data) {
   if (data is List) {
     return data
-        .map((item) => item is Map<String, dynamic>
-            ? MockTest.fromJson(item)
-            : item is Map
-                ? MockTest.fromJson(Map<String, dynamic>.from(item))
-                : null)
+        .map(
+          (item) => item is Map<String, dynamic>
+              ? MockTest.fromJson(item)
+              : item is Map
+              ? MockTest.fromJson(Map<String, dynamic>.from(item))
+              : null,
+        )
         .whereType<MockTest>()
         .toList();
   }

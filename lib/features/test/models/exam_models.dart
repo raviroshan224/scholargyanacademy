@@ -1,8 +1,5 @@
 class ExamListResponse {
-  const ExamListResponse({
-    required this.items,
-    this.meta,
-  });
+  const ExamListResponse({required this.items, this.meta});
 
   final List<ExamListItem> items;
   final ExamListMeta? meta;
@@ -15,8 +12,8 @@ class ExamListResponse {
       meta: metaJson is Map<String, dynamic>
           ? ExamListMeta.fromJson(metaJson)
           : metaJson is Map
-              ? ExamListMeta.fromJson(Map<String, dynamic>.from(metaJson))
-              : null,
+          ? ExamListMeta.fromJson(Map<String, dynamic>.from(metaJson))
+          : null,
     );
   }
 }
@@ -65,7 +62,8 @@ class ExamListItem {
 
     return ExamListItem(
       id: _string(source['id'] ?? source['_id'] ?? source['examId']) ?? '',
-      title: _string(
+      title:
+          _string(
             source['title'] ??
                 source['name'] ??
                 source['examTitle'] ??
@@ -102,13 +100,9 @@ class ExamListItem {
             source['duration'] ??
             source['duration_minutes'],
       ),
-      price: price,
-      isFree: isFree is bool
-          ? isFree
-          : isFree is num
-              ? isFree == 1
-              : _string(isFree)?.toLowerCase() == 'true',
-      isPurchased: _toBool(source['isPurchased'] ?? source['purchased']),
+      price: 0, // All exams are now free
+      isFree: true, // All exams are free
+      isPurchased: true, // All exams are accessible
       validFrom: _dateOrNull(source['validFrom'] ?? source['valid_from']),
       validTo: _dateOrNull(source['validTo'] ?? source['valid_to']),
     );
@@ -204,9 +198,9 @@ class ExamDetail {
       ),
       timePerQuestionSeconds: _int(json['timePerQuestionSeconds']),
       passingScore: _double(json['passingScore'] ?? json['passScore']),
-      isFree: _toBool(json['isFree'] ?? json['free']),
-      isPurchased: _toBool(json['isPurchased'] ?? json['purchased']),
-      price: price,
+      isFree: true, // All exams are free
+      isPurchased: true, // All exams are accessible
+      price: 0, // No price - all free
       thumbnailUrl: _string(
         json['thumbnailUrl'] ??
             json['image'] ??
@@ -221,8 +215,8 @@ class ExamDetail {
       metadata: json['meta'] is Map<String, dynamic>
           ? Map<String, dynamic>.from(json['meta'] as Map<String, dynamic>)
           : json['meta'] is Map
-              ? Map<String, dynamic>.from(json['meta'] as Map)
-              : null,
+          ? Map<String, dynamic>.from(json['meta'] as Map)
+          : null,
     );
   }
 }
@@ -253,9 +247,7 @@ class ExamCourseDetail {
       id: _string(json['id'] ?? json['_id'] ?? json['courseId']) ?? '',
       title:
           _string(json['title'] ?? json['courseTitle'] ?? json['name']) ?? '',
-      description: _string(
-        json['description'] ?? json['courseDescription'],
-      ),
+      description: _string(json['description'] ?? json['courseDescription']),
       thumbnailUrl: _string(
         json['courseIconUrl'] ??
             json['image'] ??
@@ -305,11 +297,13 @@ List<String> _decodeStringList(dynamic value) {
   if (value == null) return const <String>[];
   if (value is List) {
     return value
-        .map((item) => item is String
-            ? item
-            : item is Map && item['text'] != null
-                ? item['text'].toString()
-                : item?.toString() ?? '')
+        .map(
+          (item) => item is String
+              ? item
+              : item is Map && item['text'] != null
+              ? item['text'].toString()
+              : item?.toString() ?? '',
+        )
         .where((element) => element.isNotEmpty)
         .toList();
   }

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/core.dart';
-import '../../../../../core/services/simple_payment_service.dart';
-import '../../../../auth/view_model/providers/auth_providers.dart';
 import '../../../models/mock_test_models.dart';
 import '../../../view_model/mock_test_view_model.dart';
 import '../../../view_model/test_session_view_model.dart';
@@ -61,34 +58,18 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Payment and test access controls
-                if (mockTest.canTakeTest) ...[
-                  ReusableButton(
-                    text: 'Start Test',
-                    isLoading: ref
-                        .watch(testSessionViewModelProvider)
-                        .isStarting,
-                    onPressed: () async {
-                      await _handleStartTest(
-                        context: context,
-                        test: mockTest,
-                        sessionNotifier: sessionNotifier,
-                      );
-                    },
-                  ),
-                ] else if (!mockTest.isFree && !mockTest.isPurchased) ...[
-                  _BuyTestButton(testId: mockTest.id),
-                ] else ...[
-                  // Blocked state from backend
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: CText(
-                      'Unavailable',
-                      type: TextType.bodyMedium,
-                      color: AppColors.failure,
-                    ),
-                  ),
-                ],
+                // All tests are free - show Start Test button for all
+                ReusableButton(
+                  text: 'Start Test',
+                  isLoading: ref.watch(testSessionViewModelProvider).isStarting,
+                  onPressed: () async {
+                    await _handleStartTest(
+                      context: context,
+                      test: mockTest,
+                      sessionNotifier: sessionNotifier,
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -164,7 +145,7 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
     );
   }
 
-  /// MANDATORY FIX #4: Start test (no auto-start after payment)
+  /// Start test directly without payment checks
   Future<void> _handleStartTest({
     required BuildContext context,
     required MockTest test,
@@ -186,120 +167,6 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
       MaterialPageRoute(
         builder: (context) => QuizPage(sessionId: session.sessionId),
       ),
-    );
-  }
-}
-
-/// Buy Test Button - Simple payment flow
-class _BuyTestButton extends ConsumerStatefulWidget {
-  const _BuyTestButton({required this.testId});
-
-  final String testId;
-
-  @override
-  ConsumerState<_BuyTestButton> createState() => _BuyTestButtonState();
-}
-
-class _BuyTestButtonState extends ConsumerState<_BuyTestButton> {
-  bool _isProcessing = false;
-
-  Future<void> _handleBuyTest() async {
-    if (_isProcessing) return;
-
-    setState(() {
-      _isProcessing = true;
-    });
-
-    try {
-      final paymentService = ref.read(simplePaymentServiceProvider);
-
-      // Call payment initiate API
-      final redirectUrl = await paymentService.initiatePayment(
-        paymentType: 'test_purchase',
-        referenceId: widget.testId,
-        promoCode: null,
-      );
-
-      if (!mounted) return;
-
-      if (redirectUrl == null) {
-        // Show error if API call failed
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to initiate payment. Please try again.'),
-            backgroundColor: AppColors.failure,
-          ),
-        );
-        return;
-      }
-
-      // Open redirect URL in external browser
-      final uri = Uri.parse(redirectUrl);
-      final launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-
-      if (!launched && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to open payment page. Please try again.'),
-            backgroundColor: AppColors.failure,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: AppColors.failure,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ReusableButton(
-      text: 'Buy Test',
-      isLoading: _isProcessing,
-      onPressed: () async {
-        final authState = ref.read(authNotifierProvider);
-        final userId = authState.user?.id ?? '';
-
-        final uri =
-            Uri.parse(
-              'https://scholargyan.onecloudlab.com/payment/checkout',
-            ).replace(
-              queryParameters: {
-                'type': 'test_purchase',
-                'referenceId': widget.testId,
-                'userId': userId,
-              },
-            );
-        // debugger(message: uri.toString());
-        final launched = await launchUrl(
-          uri,
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => PaymentWebViewPage(
-        //       url: uri.toString(),
-        //       title: 'Test Payment',
-        //     ),
-        //   ),
-        // );
-      },
     );
   }
 }

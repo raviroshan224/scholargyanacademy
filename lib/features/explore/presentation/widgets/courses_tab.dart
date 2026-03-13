@@ -392,17 +392,9 @@ class CoursesTab extends ConsumerWidget {
             isSaved: isExamCourse
                 ? (course.isSaved ?? false)
                 : (course.isSaved ?? false),
-            enrollmentCost: isExamCourse
-                ? (course.enrollmentCost ?? course.price)
-                : course.enrollmentCost,
-            discountedPrice: isExamCourse ? null : course.discountedPrice,
-            hasOffer: isExamCourse ? null : course.hasOffer,
             durationHours: isExamCourse
                 ? (course.durationHours ?? course.duration)
                 : course.durationHours,
-            // validityDays: isExamCourse
-            //     ? (course.validityDays ?? course.validity)
-            //     : course.validityDays,
           ),
         ),
       ),

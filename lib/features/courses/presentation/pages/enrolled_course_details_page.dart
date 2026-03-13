@@ -535,7 +535,6 @@ class _EnrolledCourseDetailsPageState
         return NumberFormat.compact().format(value);
       }
 
-      final enrollmentCost = formatCurrency(asInt(course['enrollmentCost']));
       final duration = formatHours(asInt(course['durationHours']));
       final validity = formatDays(asInt(course['validityDays']));
       final totalLectures = currentState.lectures.isNotEmpty
@@ -550,15 +549,14 @@ class _EnrolledCourseDetailsPageState
       final totalStudents = asInt(stats['totalStudents']);
 
       final highlights = <_HighlightData>[];
-      if (enrollmentCost != null) {
-        highlights.add(
-          _HighlightData(
-            icon: Icons.payments_outlined,
-            label: 'Enrollment Fee',
-            value: enrollmentCost,
-          ),
-        );
-      }
+      // All courses are now free
+      highlights.add(
+        _HighlightData(
+          icon: Icons.card_giftcard_outlined,
+          label: 'Price',
+          value: 'Free',
+        ),
+      );
       if (duration != null) {
         highlights.add(
           _HighlightData(

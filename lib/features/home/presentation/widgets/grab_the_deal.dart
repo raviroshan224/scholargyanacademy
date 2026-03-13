@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/core.dart';
-import '../../models/homepage_models.dart' as home_models;
 import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
+import '../../models/homepage_models.dart' as home_models;
 
 class GrabTheDealList extends StatelessWidget {
-  const GrabTheDealList({
-    super.key,
-    this.topCategory,
-    this.isLoading = false,
-  });
+  const GrabTheDealList({super.key, this.topCategory, this.isLoading = false});
 
   final home_models.TopCategoryWithCourses? topCategory;
   final bool isLoading;
@@ -26,17 +21,12 @@ class GrabTheDealList extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: CText(
-          'Grab deals appear when top categories add new offers.',
+          'Featured courses appear when new courses are added.',
           type: TextType.bodySmall,
           color: AppColors.gray500,
         ),
       );
     }
-
-    final currencyFormatter = NumberFormat.compactCurrency(
-      decimalDigits: 0,
-      symbol: 'Rs. ',
-    );
 
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
@@ -50,24 +40,12 @@ class GrabTheDealList extends StatelessWidget {
 
         final courseId = course.id?.toString();
 
-        final enrollmentCost = course.enrollmentCost;
-        final discountedPrice = course.discountedPrice;
-        final hasOffer = course.hasOffer;
-
-        final bool isFree = enrollmentCost == 0;
-        final bool hasValidDiscount = hasOffer == true &&
-            enrollmentCost != null &&
-            discountedPrice != null &&
-            enrollmentCost > discountedPrice;
-
         return InkWell(
           onTap: () {
             if (courseId == null || courseId.isEmpty) return;
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => EnrolledCourseDetailsPage(
-                  courseId: courseId,
-                ),
+                builder: (_) => EnrolledCourseDetailsPage(courseId: courseId),
               ),
             );
           },
@@ -83,7 +61,7 @@ class GrabTheDealList extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Course Image with Badge
+                  // Course Image
                   Stack(
                     children: [
                       ClipRRect(
@@ -95,13 +73,8 @@ class GrabTheDealList extends StatelessWidget {
                           fitStatus: BoxFit.cover,
                         ),
                       ),
-                      if (hasValidDiscount)
-                        _buildBadge(
-                          '${_calculateDiscount(enrollmentCost, discountedPrice)}% OFF',
-                          const Color(0xFFEA4335),
-                        ),
-                      if (isFree)
-                        _buildBadge('FREE', const Color(0xFF0F9D58)),
+                      // Free badge
+                      _buildBadge('FREE', const Color(0xFF0F9D58)),
                     ],
                   ),
                   const SizedBox(width: 12),
@@ -129,11 +102,10 @@ class GrabTheDealList extends StatelessWidget {
                         ],
                         const SizedBox(height: 8),
 
-                        // Price and validity row
+                        // Free label and validity row
                         Row(
                           children: [
-                            _buildPrice(
-                                isFree, hasValidDiscount, enrollmentCost, discountedPrice),
+                            _buildFreeLabel(),
                             if (course.validityDays != null) ...[
                               const Spacer(),
                               Icon(
@@ -190,66 +162,21 @@ class GrabTheDealList extends StatelessWidget {
     );
   }
 
-  int _calculateDiscount(int? original, int? discounted) {
-    if (original == null || discounted == null || original == 0) return 0;
-    return (((original - discounted) / original) * 100).round();
-  }
-
-  Widget _buildPrice(
-      bool isFree, bool hasDiscount, int? enrollmentCost, int? discountedPrice) {
-    if (isFree) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F9D58).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Text(
-          'Free',
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF0F9D58),
-          ),
-        ),
-      );
-    }
-
-    if (hasDiscount) {
-      return Row(
-        children: [
-          Text(
-            'Rs ${NumberFormat('#,##,###').format(discountedPrice)}',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'Rs ${NumberFormat('#,##,###').format(enrollmentCost)}',
-            style: const TextStyle(
-              fontSize: 11,
-              decoration: TextDecoration.lineThrough,
-              color: AppColors.gray500,
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (enrollmentCost != null) {
-      return Text(
-        'Rs ${NumberFormat('#,##,###').format(enrollmentCost)}',
-        style: const TextStyle(
-          fontSize: 14,
+  Widget _buildFreeLabel() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F9D58).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Text(
+        'Free',
+        style: TextStyle(
+          fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: AppColors.primary,
+          color: Color(0xFF0F9D58),
         ),
-      );
-    }
-
-    return const SizedBox.shrink();
+      ),
+    );
   }
 }

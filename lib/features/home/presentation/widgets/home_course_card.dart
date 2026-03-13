@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/core.dart';
 import '../../../courses/view_model/course_view_model.dart';
@@ -13,9 +12,6 @@ class HomeCourseCard extends ConsumerWidget {
     required this.imagePath,
     this.courseId,
     this.isSaved = false,
-    this.enrollmentCost,
-    this.discountedPrice,
-    this.hasOffer,
     this.durationHours,
   });
 
@@ -24,24 +20,13 @@ class HomeCourseCard extends ConsumerWidget {
   final String imagePath;
   final String? courseId;
   final bool isSaved;
-  final int? enrollmentCost;
-  final int? discountedPrice;
-  final bool? hasOffer;
   final int? durationHours;
 
-  // static const double _width = 160;
   static const double _width = 160;
   static const double _height = 256;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bool isFree = enrollmentCost == 0;
-    final bool hasValidDiscount =
-        hasOffer == true &&
-        enrollmentCost != null &&
-        discountedPrice != null &&
-        enrollmentCost! > discountedPrice!;
-
     return SizedBox(
       width: _width,
       height: _height,
@@ -71,9 +56,6 @@ class HomeCourseCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // if (hasValidDiscount)
-                // _badge('${_discount()}% OFF', const Color(0xFFEA4335)),
-                // _badge('FREE', const Color(0xFF0F9D58)),
                 if (courseId != null)
                   Positioned(top: 8, right: 8, child: _bookmark(ref, context)),
               ],
@@ -113,42 +95,17 @@ class HomeCourseCard extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Explore',
+                    'Free',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF0F9D58),
                     ),
                   ),
-                  // _price(true, hasValidDiscount),
                 ],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  /// ---------- HELPERS ----------
-
-  Widget _badge(String text, Color color) {
-    return Positioned(
-      top: 8,
-      left: 8,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
         ),
       ),
     );
@@ -176,55 +133,5 @@ class HomeCourseCard extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Widget _price(bool isFree, bool hasDiscount) {
-    if (isFree) {
-      return const Text(
-        'Free',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF0F9D58),
-        ),
-      );
-    }
-
-    if (hasDiscount) {
-      return Row(
-        children: [
-          Text(
-            'Rs ${NumberFormat('#,##,###').format(discountedPrice)}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            'Rs ${NumberFormat('#,##,###').format(enrollmentCost)}',
-            style: const TextStyle(
-              fontSize: 12,
-              decoration: TextDecoration.lineThrough,
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (enrollmentCost != null) {
-      return Text(
-        'Rs ${NumberFormat('#,##,###').format(enrollmentCost)}',
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-      );
-    }
-
-    return const SizedBox.shrink();
-  }
-
-  int _discount() {
-    if (enrollmentCost == null ||
-        discountedPrice == null ||
-        enrollmentCost == 0)
-      return 0;
-    return (((enrollmentCost! - discountedPrice!) / enrollmentCost!) * 100)
-        .round();
   }
 }

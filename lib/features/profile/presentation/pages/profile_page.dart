@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../config/services/navigation_service.dart';
-import '../../../courses/presentation/widgets/payment_web_view.dart';
 import '../../../../core/core.dart';
+import '../../../../core/widgets/web_view/generic_web_view_page.dart';
 import '../../../auth/view_model/auth_state.dart';
 import '../../../auth/view_model/providers/auth_providers.dart';
 import '../../../before_auth/presentation/pages/course_selection.dart';
@@ -200,8 +200,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const PaymentWebViewPage(
-                        url: 'https://scholargyan.onecloudlab.com/api/v1/auth/me',
+                      builder: (context) => const GenericWebViewPage(
+                        url:
+                            'https://scholargyan.onecloudlab.com/api/v1/auth/me',
                         title: 'Delete Account',
                       ),
                     ),
@@ -212,7 +213,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               cardTitle: 'Delete account',
               isLoading: isLoading,
             ),
-//
+            //
             AppSpacing.verticalSpaceSmall,
             ProfileTextRow(
               onPressed: () async {
