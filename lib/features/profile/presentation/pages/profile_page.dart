@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../config/services/navigation_service.dart';
 import '../../../../core/core.dart';
-import '../../../../core/widgets/web_view/generic_web_view_page.dart';
 import '../../../auth/view_model/auth_state.dart';
 import '../../../auth/view_model/providers/auth_providers.dart';
 import '../../../before_auth/presentation/pages/course_selection.dart';
@@ -11,6 +10,7 @@ import '../../../courses/presentation/pages/upcoming_live_classes_page.dart';
 import '../../../exams/presentation/pages/exam_list_page.dart';
 import '../../../test/test.dart';
 import '../../profile.dart';
+import 'detail _pages/privacy_policy_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -195,17 +195,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   },
                 );
 
-                // If confirmed, open webview
                 if (shouldDelete == true) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const GenericWebViewPage(
-                        url:
-                            'https://scholargyan.onecloudlab.com/api/v1/auth/me',
-                        title: 'Delete Account',
-                      ),
-                    ),
+                  AppMethods.showCustomSnackBar(
+                    context: context,
+                    message:
+                        'Account deletion request received. Our team will process it shortly.',
+                    isError: false,
                   );
                 }
               },
@@ -295,16 +290,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.description_outlined,
               cardTitle: 'Terms & Conditions',
             ),
-            ProfileTextRow(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => FAQPage()),
-                );
-              },
-              icon: Icons.help,
-              cardTitle: 'FAQs',
-            ),
+
             ProfileTextRow(
               onPressed: () {
                 Navigator.push(
@@ -316,7 +302,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               cardTitle: 'Help & support',
             ),
             ProfileTextRow(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PrivacyPolicyPage(),
+                  ),
+                );
+              },
               icon: Icons.privacy_tip,
               cardTitle: 'Privacy Policy',
             ),

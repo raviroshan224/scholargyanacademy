@@ -33,9 +33,6 @@ class CourseModel {
   final String? categoryName;
   final String? courseImageUrl;
   final String? courseIconUrl;
-  final int? enrollmentCost;
-  final int? discountedPrice;
-  final bool? hasOffer;
   final int? durationHours;
   final int? validityDays;
   final String slug;
@@ -54,9 +51,6 @@ class CourseModel {
     this.categoryName,
     this.courseImageUrl,
     this.courseIconUrl,
-    this.enrollmentCost,
-    this.discountedPrice,
-    this.hasOffer,
     this.durationHours,
     this.validityDays,
     this.displayOrder,
@@ -72,12 +66,6 @@ class CourseModel {
         categoryName: json['categoryName'],
         courseImageUrl: json['courseImageUrl'],
         courseIconUrl: json['courseIconUrl'],
-        enrollmentCost: json['enrollmentCost'],
-        discountedPrice: json['discountedPrice'],
-        hasOffer: json['hasOffer'] is bool
-            ? json['hasOffer'] as bool
-            : (json['hasOffer']?.toString().toLowerCase() == 'true' ||
-                json['hasOffer']?.toString() == '1'),
         durationHours: json['durationHours'],
         validityDays: json['validityDays'],
         slug: json['slug'] ?? '',
@@ -95,9 +83,6 @@ class CourseModel {
     String? categoryName,
     String? courseImageUrl,
     String? courseIconUrl,
-    int? enrollmentCost,
-    int? discountedPrice,
-    bool? hasOffer,
     int? durationHours,
     int? validityDays,
     String? slug,
@@ -114,9 +99,6 @@ class CourseModel {
       categoryName: categoryName ?? this.categoryName,
       courseImageUrl: courseImageUrl ?? this.courseImageUrl,
       courseIconUrl: courseIconUrl ?? this.courseIconUrl,
-      enrollmentCost: enrollmentCost ?? this.enrollmentCost,
-      discountedPrice: discountedPrice ?? this.discountedPrice,
-      hasOffer: hasOffer ?? this.hasOffer,
       durationHours: durationHours ?? this.durationHours,
       validityDays: validityDays ?? this.validityDays,
       slug: slug ?? this.slug,
@@ -332,7 +314,6 @@ class LectureModel {
   final String? coverImageUrl;
   final int? durationSeconds;
   final int? displayOrder;
-  final bool isFree;
   final bool isActive;
   final String? processingStatus;
   final int? viewCount;
@@ -353,7 +334,6 @@ class LectureModel {
     this.coverImageUrl,
     this.durationSeconds,
     this.displayOrder,
-    this.isFree = false,
     this.isActive = true,
     this.processingStatus,
     this.viewCount,
@@ -381,7 +361,6 @@ class LectureModel {
       displayOrder: json['displayOrder'] is num
           ? (json['displayOrder'] as num).toInt()
           : null,
-      isFree: json['isFree'] ?? json['is_free'] ?? false,
       isActive: json['isActive'] ?? json['is_active'] ?? true,
       processingStatus: json['processingStatus']?.toString(),
       viewCount:
@@ -457,7 +436,6 @@ class MockTestModel {
   final String? subjectName;
   final int? numberOfQuestions;
   final int? durationMinutes;
-  final int? cost;
   final int? attemptsAllowed;
   final String? status;
   final Map<String, dynamic> raw;
@@ -475,7 +453,6 @@ class MockTestModel {
     this.subjectName,
     this.numberOfQuestions,
     this.durationMinutes,
-    this.cost,
     this.attemptsAllowed,
     this.status,
   });
@@ -500,7 +477,6 @@ class MockTestModel {
       durationMinutes: _coerceToInt(
         map['durationMinutes'] ?? map['duration'] ?? map['durationInMinutes'],
       ),
-      cost: _coerceToInt(map['cost']),
       attemptsAllowed: _coerceToInt(map['attemptsAllowed']),
       status: map['status']?.toString(),
       raw: map,

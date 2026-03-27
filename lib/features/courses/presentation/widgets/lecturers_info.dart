@@ -12,7 +12,7 @@ class LecturersInfo extends ConsumerWidget {
     final state = ref.watch(coursesViewModelProvider);
     final lecturers = state.lecturers;
 
-    if (!state.isEnrolled) {
+    if (!state.isListed) {
       return const Center(child: CText('No lecturers available right now'));
     }
 

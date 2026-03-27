@@ -55,6 +55,5 @@ class AppAssets {
 
   static String dummyNetImg = 'assets/pictures/Default_image.png';
 
-  static var networkImgTwo =
-      'https://www.globalcareercounsellor.com/blog/wp-content/uploads/2018/05/Online-Career-Counselling-course.jpg';
+  static var networkImgTwo = 'assets/pictures/Default_image.png';
 }

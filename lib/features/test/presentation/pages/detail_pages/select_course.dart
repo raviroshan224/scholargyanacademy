@@ -139,10 +139,6 @@ class _CourseTile extends StatelessWidget {
                       label: 'Validity',
                       value: '${course.validityDays} days',
                     ),
-                  _MetaChip(
-                    label: 'Price',
-                    value: 'Free',
-                  ),
                 ],
               ),
             ],

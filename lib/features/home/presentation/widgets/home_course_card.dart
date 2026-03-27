@@ -93,15 +93,6 @@ class HomeCourseCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Free',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F9D58),
-                    ),
-                  ),
                 ],
               ),
             ),

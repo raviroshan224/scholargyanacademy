@@ -1,5 +1,4 @@
 export 'presentation/pages/detail _pages/about_us_page.dart';
-export 'presentation/pages/detail _pages/faq_page.dart';
 export 'presentation/pages/detail _pages/saved_pages.dart';
 export 'presentation/pages/detail _pages/support_page.dart';
 export 'presentation/pages/detail _pages/terms_condition_page.dart';

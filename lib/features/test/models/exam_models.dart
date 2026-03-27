@@ -29,9 +29,7 @@ class ExamListItem {
     this.categoryName,
     this.totalQuestions,
     this.durationMinutes,
-    this.price,
-    this.isFree,
-    this.isPurchased,
+    this.isAccessible = true,
     this.validFrom,
     this.validTo,
   });
@@ -45,9 +43,7 @@ class ExamListItem {
   final String? categoryName;
   final int? totalQuestions;
   final int? durationMinutes;
-  final double? price;
-  final bool? isFree;
-  final bool? isPurchased;
+  final bool isAccessible;
   final DateTime? validFrom;
   final DateTime? validTo;
 
@@ -57,8 +53,6 @@ class ExamListItem {
         ? Map<String, dynamic>.from(root['exam'] as Map)
         : null;
     final source = nested ?? root;
-    final price = _double(source['price'] ?? source['enrollmentCost']);
-    final isFree = source['isFree'];
 
     return ExamListItem(
       id: _string(source['id'] ?? source['_id'] ?? source['examId']) ?? '',
@@ -100,9 +94,7 @@ class ExamListItem {
             source['duration'] ??
             source['duration_minutes'],
       ),
-      price: 0, // All exams are now free
-      isFree: true, // All exams are free
-      isPurchased: true, // All exams are accessible
+      isAccessible: true,
       validFrom: _dateOrNull(source['validFrom'] ?? source['valid_from']),
       validTo: _dateOrNull(source['validTo'] ?? source['valid_to']),
     );
@@ -151,9 +143,7 @@ class ExamDetail {
     this.durationMinutes,
     this.timePerQuestionSeconds,
     this.passingScore,
-    this.isFree,
-    this.isPurchased,
-    this.price,
+    this.isAccessible = true,
     this.thumbnailUrl,
     this.validFrom,
     this.validTo,
@@ -169,9 +159,7 @@ class ExamDetail {
   final int? durationMinutes;
   final int? timePerQuestionSeconds;
   final double? passingScore;
-  final bool? isFree;
-  final bool? isPurchased;
-  final double? price;
+  final bool isAccessible;
   final String? thumbnailUrl;
   final DateTime? validFrom;
   final DateTime? validTo;
@@ -180,7 +168,6 @@ class ExamDetail {
   final Map<String, dynamic>? metadata;
 
   factory ExamDetail.fromJson(Map<String, dynamic> json) {
-    final price = _double(json['price'] ?? json['enrollmentCost']);
     return ExamDetail(
       id: _string(json['id'] ?? json['_id'] ?? json['examId']) ?? '',
       title: _string(json['title'] ?? json['name'] ?? json['examTitle']) ?? '',
@@ -198,9 +185,7 @@ class ExamDetail {
       ),
       timePerQuestionSeconds: _int(json['timePerQuestionSeconds']),
       passingScore: _double(json['passingScore'] ?? json['passScore']),
-      isFree: true, // All exams are free
-      isPurchased: true, // All exams are accessible
-      price: 0, // No price - all free
+      isAccessible: true,
       thumbnailUrl: _string(
         json['thumbnailUrl'] ??
             json['image'] ??
@@ -227,7 +212,6 @@ class ExamCourseDetail {
     required this.title,
     this.description,
     this.thumbnailUrl,
-    this.enrollmentCost,
     this.durationHours,
     this.validityDays,
     this.isSaved,
@@ -237,7 +221,6 @@ class ExamCourseDetail {
   final String title;
   final String? description;
   final String? thumbnailUrl;
-  final double? enrollmentCost;
   final int? durationHours;
   final int? validityDays;
   final bool? isSaved;
@@ -254,7 +237,6 @@ class ExamCourseDetail {
             json['courseImageUrl'] ??
             json['cover'],
       ),
-      enrollmentCost: _double(json['enrollmentCost'] ?? json['price']),
       durationHours: _int(json['durationHours'] ?? json['duration_hours']),
       validityDays: _int(json['validityDays'] ?? json['validity_days']),
       isSaved: _toBool(json['isSaved'] ?? json['saved']),

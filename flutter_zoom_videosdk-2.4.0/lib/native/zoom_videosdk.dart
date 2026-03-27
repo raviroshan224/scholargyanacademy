@@ -360,7 +360,7 @@ class Errors {
       'ZoomVideoSDKError_JoinSession_Token_MismatchedSessionName';
   static const JoinSessionTokenNoSessionName =
       'ZoomVideoSDKError_JoinSession_Token_NoSessionName';
-  static const JoinSessionTokenRoleTypeEmptyOrWrong =
+  static const JoinSessionTokListteTypeEmptyOrWrong =
       'ZoomVideoSDKError_JoinSession_Token_RoleType_EmptyOrWrong';
   static const JoinSessionTokenUserIdentityTooLong =
       'ZoomVideoSDKError_JoinSession_Token_UserIdentity_TooLong';

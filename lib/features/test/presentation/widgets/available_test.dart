@@ -180,12 +180,6 @@ class AvailableList extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          CText(
-                            'Free',
-                            type: TextType.bodyMedium,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.success,
-                          ),
                           if (exam.validTo != null)
                             Padding(
                               padding: const EdgeInsets.only(top: 4.0),

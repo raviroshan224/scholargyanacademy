@@ -133,9 +133,6 @@ class Course {
     this.courseTitle,
     this.courseImageUrl,
     this.courseIconUrl,
-    this.enrollmentCost,
-    this.discountedPrice,
-    this.hasOffer,
     this.durationHours,
     this.isSaved,
     this.categoryName,
@@ -146,9 +143,6 @@ class Course {
   final String? courseTitle;
   final String? courseImageUrl;
   final String? courseIconUrl;
-  final int? enrollmentCost;
-  final int? discountedPrice;
-  final bool? hasOffer;
   final int? durationHours;
   final bool? isSaved;
   final String? categoryName;
@@ -159,12 +153,6 @@ class Course {
         courseTitle: json['courseTitle']?.toString(),
         courseImageUrl: json['courseImageUrl']?.toString(),
         courseIconUrl: json['courseIconUrl']?.toString(),
-        enrollmentCost: _toInt(json['enrollmentCost']),
-        discountedPrice: _toInt(json['discountedPrice']),
-        hasOffer: json['hasOffer'] is bool
-            ? json['hasOffer'] as bool
-            : (json['hasOffer']?.toString().toLowerCase() == 'true' ||
-                json['hasOffer']?.toString() == '1'),
         durationHours: _toInt(json['durationHours']),
         isSaved: json['isSaved'] is bool
             ? json['isSaved'] as bool

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
-import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
 import 'home_course_card.dart';
 
 typedef CourseCardTap = void Function(CourseCardData data);
@@ -113,7 +113,7 @@ class CourseCard extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => EnrolledCourseDetailsPage(courseId: item.courseId!),
+          builder: (_) => ListedCourseDetailsPage(courseId: item.courseId!),
         ),
       );
     }
@@ -129,12 +129,9 @@ class CourseCardData {
     this.imageUrl,
     this.courseId,
     this.isSaved = false,
-    this.enrollmentCost,
     this.durationHours,
     this.validityDays,
     this.categoryId,
-    this.discountedPrice,
-    this.hasOffer,
   });
 
   final String title;
@@ -142,10 +139,7 @@ class CourseCardData {
   final String? imageUrl;
   final String? courseId;
   final bool isSaved;
-  final int? enrollmentCost;
   final int? durationHours;
   final int? validityDays;
   final String? categoryId;
-  final int? discountedPrice;
-  final bool? hasOffer;
 }

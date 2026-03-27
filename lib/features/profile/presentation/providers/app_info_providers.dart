@@ -12,26 +12,11 @@ final appInfoRepositoryProvider = Provider<AppInfoRepository>((ref) {
 final aboutAppInfoProvider = FutureProvider<AppInfoContent>((ref) async {
   final repository = ref.watch(appInfoRepositoryProvider);
   final result = await repository.fetchAbout();
-  return result.fold(
-    (failure) => throw failure,
-    (content) => content,
-  );
+  return result.fold((failure) => throw failure, (content) => content);
 });
 
 final termsAppInfoProvider = FutureProvider<AppInfoContent>((ref) async {
   final repository = ref.watch(appInfoRepositoryProvider);
   final result = await repository.fetchTerms();
-  return result.fold(
-    (failure) => throw failure,
-    (content) => content,
-  );
-});
-
-final faqAppInfoProvider = FutureProvider<List<AppFaqItem>>((ref) async {
-  final repository = ref.watch(appInfoRepositoryProvider);
-  final result = await repository.fetchFaqs();
-  return result.fold(
-    (failure) => throw failure,
-    (items) => items,
-  );
+  return result.fold((failure) => throw failure, (content) => content);
 });

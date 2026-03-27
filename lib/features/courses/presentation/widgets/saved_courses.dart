@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
 import '../../model/course_models.dart';
 import '../../service/course_service.dart';
-import '../pages/enrolled_course_details_page.dart';
 
 class SavedCoursesWidget extends ConsumerStatefulWidget {
   const SavedCoursesWidget({super.key});
@@ -175,7 +175,7 @@ class _SavedCoursesWidgetState extends ConsumerState<SavedCoursesWidget> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EnrolledCourseDetailsPage(courseId: course.id),
+        builder: (_) => ListedCourseDetailsPage(courseId: course.id),
       ),
     );
   }
@@ -251,7 +251,6 @@ class _SavedCourseCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     // CText(
-                    //   'Rs. ${course.enrollmentCost ?? 0}',
                     //   type: TextType.titleMedium,
                     //   color: AppColors.primary,
                     //   fontWeight: FontWeight.w600,

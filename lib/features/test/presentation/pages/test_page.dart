@@ -201,8 +201,7 @@ class _TestPageState extends ConsumerState<TestPage> {
       return;
     }
 
-    // Navigate to test details page for purchase
-    // User will use the "Buy Test" button there
+    // Navigate to test details page
     Navigator.push(
       context,
       MaterialPageRoute(

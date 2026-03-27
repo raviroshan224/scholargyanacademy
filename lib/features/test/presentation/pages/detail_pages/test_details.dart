@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/core.dart';
@@ -47,6 +46,11 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
         ? state.selectedTest
         : null;
     final mockTest = detail ?? widget.initialTest;
+    final description = mockTest.description?.isNotEmpty == true
+        ? AppMethods.parseHtmlToPlainText(
+            htmlString: mockTest.description!,
+          )
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.white,
@@ -92,16 +96,10 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: AppColors.gray200),
                       ),
-                      child: Html(
-                        data: mockTest.description,
-                        style: {
-                          'body': Style(
-                            margin: Margins.zero,
-                            padding: HtmlPaddings.zero,
-                            fontSize: FontSize.medium,
-                            color: AppColors.gray700,
-                          ),
-                        },
+                      child: CText(
+                        description ?? '',
+                        type: TextType.bodyMedium,
+                        color: AppColors.gray700,
                       ),
                     ),
                   AppSpacing.verticalSpaceLarge,
@@ -145,7 +143,7 @@ class _TestDetailsPageState extends ConsumerState<TestDetailsPage> {
     );
   }
 
-  /// Start test directly without payment checks
+  /// Start test
   Future<void> _handleStartTest({
     required BuildContext context,
     required MockTest test,

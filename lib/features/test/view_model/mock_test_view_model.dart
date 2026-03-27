@@ -229,7 +229,7 @@ class MockTestViewModel extends StateNotifier<MockTestState> {
     final courseId = state.selectedCourseId;
     if (courseId == null) return;
 
-    // Skip cache if force refresh is requested (e.g., after payment)
+    // Skip cache if force refresh is requested
     if (!force) {
       final cached = _findTestById(mockTestId);
       if (cached != null) {
@@ -282,21 +282,17 @@ class MockTestViewModel extends StateNotifier<MockTestState> {
   void updateTestAccess({
     required String mockTestId,
     bool? canTakeTest,
-    bool? isPurchased,
   }) {
     var testsChanged = false;
     final updatedTests = state.tests.map((test) {
       if (_matches(mockTestId, test)) {
         final nextCanTake = canTakeTest ?? test.canTakeTest;
-        final nextPurchased = isPurchased ?? test.isPurchased;
-        if (nextCanTake == test.canTakeTest &&
-            nextPurchased == test.isPurchased) {
+        if (nextCanTake == test.canTakeTest) {
           return test;
         }
         testsChanged = true;
         return test.copyWith(
           canTakeTest: nextCanTake,
-          isPurchased: nextPurchased,
         );
       }
       return test;
@@ -306,12 +302,9 @@ class MockTestViewModel extends StateNotifier<MockTestState> {
     MockTest? updatedSelected = currentSelected;
     if (currentSelected != null && _matches(mockTestId, currentSelected)) {
       final nextCanTake = canTakeTest ?? currentSelected.canTakeTest;
-      final nextPurchased = isPurchased ?? currentSelected.isPurchased;
-      if (nextCanTake != currentSelected.canTakeTest ||
-          nextPurchased != currentSelected.isPurchased) {
+      if (nextCanTake != currentSelected.canTakeTest) {
         updatedSelected = currentSelected.copyWith(
           canTakeTest: nextCanTake,
-          isPurchased: nextPurchased,
         );
       }
     }

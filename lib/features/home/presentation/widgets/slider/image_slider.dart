@@ -31,7 +31,11 @@ class ImageSlider extends ConsumerWidget {
           ((disableImagePreview ?? false)
               ? () {
                   if (linkAttached != null && linkAttached!.isNotEmpty) {
-                    AppMethods.urlLauncherHelper(context, linkAttached);
+                    AppMethods.showCustomSnackBar(
+                      context: context,
+                      message: 'External links are unavailable in the app.',
+                      isError: true,
+                    );
                   }
                 }
               : () {

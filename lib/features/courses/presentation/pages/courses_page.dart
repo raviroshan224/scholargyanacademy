@@ -16,7 +16,7 @@ class CoursePage extends ConsumerWidget {
     final selectedTabIndex = ref.watch(selectedTabIndexProvider);
     return Scaffold(
       backgroundColor: AppColors.white,
-      appBar: CustomAppBar(title: "Courses Enrolled"),
+      appBar: CustomAppBar(title: "My Courses"),
       body: Column(
         children: [
           const SizedBox(height: 16),

@@ -61,7 +61,6 @@ class MockTest {
     this.subjectName,
     this.subjectDistribution = const <Map<String, dynamic>>[],
     this.numberOfQuestions,
-    this.cost,
     this.durationMinutes,
     this.passingPercentage,
     this.attemptsAllowed,
@@ -70,8 +69,7 @@ class MockTest {
     this.attemptsUsed,
     this.remainingAttempts,
     this.maxAttemptsReached,
-    this.isFree = false,
-    this.isPurchased = false,
+    this.isAccessible = true,
     this.canTakeTest = false,
     this.extra,
   });
@@ -86,7 +84,6 @@ class MockTest {
   final String? subjectName;
   final List<Map<String, dynamic>> subjectDistribution;
   final int? numberOfQuestions;
-  final double? cost;
   final int? durationMinutes;
   final double? passingPercentage;
   final int? attemptsAllowed;
@@ -95,8 +92,7 @@ class MockTest {
   final int? attemptsUsed;
   final int? remainingAttempts;
   final bool? maxAttemptsReached;
-  final bool isFree;
-  final bool isPurchased;
+  final bool isAccessible;
   final bool canTakeTest;
   final Map<String, dynamic>? extra;
 
@@ -126,7 +122,6 @@ class MockTest {
       numberOfQuestions: _asInt(
         json['numberOfQuestions'] ?? json['questionCount'],
       ),
-      cost: _asDouble(json['cost'] ?? json['price']),
       durationMinutes: _asInt(
         json['durationMinutes'] ?? json['duration'] ?? json['time'],
       ),
@@ -145,9 +140,8 @@ class MockTest {
       maxAttemptsReached: _asBool(
         json['maxAttemptsReached'] ?? json['isLockedOut'],
       ),
-      isFree: true, // All tests are now free
-      isPurchased: true, // All tests are accessible
-      canTakeTest: true, // All tests can be taken
+      isAccessible: true,
+      canTakeTest: true,
       extra: json['extra'] is Map<String, dynamic>
           ? Map<String, dynamic>.from(json['extra'] as Map<String, dynamic>)
           : json['extra'] is Map
@@ -156,7 +150,7 @@ class MockTest {
     );
   }
 
-  MockTest copyWith({String? courseId, bool? isPurchased, bool? canTakeTest}) {
+  MockTest copyWith({String? courseId, bool? isAccessible, bool? canTakeTest}) {
     return MockTest(
       id: id,
       courseId: courseId ?? this.courseId,
@@ -168,7 +162,6 @@ class MockTest {
       subjectName: subjectName,
       subjectDistribution: subjectDistribution,
       numberOfQuestions: numberOfQuestions,
-      cost: cost,
       durationMinutes: durationMinutes,
       passingPercentage: passingPercentage,
       attemptsAllowed: attemptsAllowed,
@@ -177,8 +170,7 @@ class MockTest {
       attemptsUsed: attemptsUsed,
       remainingAttempts: remainingAttempts,
       maxAttemptsReached: maxAttemptsReached,
-      isFree: this.isFree,
-      isPurchased: isPurchased ?? this.isPurchased,
+      isAccessible: isAccessible ?? this.isAccessible,
       canTakeTest: canTakeTest ?? this.canTakeTest,
       extra: extra,
     );

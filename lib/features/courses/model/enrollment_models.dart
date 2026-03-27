@@ -1,11 +1,11 @@
-class EnrollmentProgress {
+class ListmentProgress {
   final int completedLecturesCount;
   final int totalLectures;
   final double progressPercentage;
   final String? lastAccessedAt;
   final String? lastAccessedLectureId;
 
-  EnrollmentProgress({
+  ListmentProgress({
     required this.completedLecturesCount,
     required this.totalLectures,
     required this.progressPercentage,
@@ -13,8 +13,8 @@ class EnrollmentProgress {
     this.lastAccessedLectureId,
   });
 
-  factory EnrollmentProgress.fromJson(Map<String, dynamic> json) =>
-      EnrollmentProgress(
+  factory ListmentProgress.fromJson(Map<String, dynamic> json) =>
+      ListmentProgress(
         completedLecturesCount: json['completedLecturesCount'] ?? 0,
         totalLectures: json['totalLectures'] ?? 0,
         progressPercentage: (json['progressPercentage'] is num)
@@ -25,21 +25,21 @@ class EnrollmentProgress {
       );
 }
 
-class EnrollmentCertificate {
+class ListmentCertificate {
   final bool issued;
   final String? issuedAt;
   final String? certificateUrl;
   final String? certificateNumber;
 
-  EnrollmentCertificate({
+  ListmentCertificate({
     required this.issued,
     this.issuedAt,
     this.certificateUrl,
     this.certificateNumber,
   });
 
-  factory EnrollmentCertificate.fromJson(Map<String, dynamic> json) =>
-      EnrollmentCertificate(
+  factory ListmentCertificate.fromJson(Map<String, dynamic> json) =>
+      ListmentCertificate(
         issued: json['issued'] ?? false,
         issuedAt: json['issuedAt']?.toString(),
         certificateUrl: json['certificateUrl']?.toString(),
@@ -47,26 +47,24 @@ class EnrollmentCertificate {
       );
 }
 
-class EnrollmentCourse {
+class ListmentCourse {
   final String id;
   final String courseTitle;
   final String? courseDescription;
   final String? courseImageUrl;
   final String? courseIconUrl;
-  final int? enrollmentCost;
   final int? durationHours;
   final int? validityDays;
   final String? slug;
   final String? categoryName;
   final Map<String, dynamic>? stats;
 
-  EnrollmentCourse({
+  ListmentCourse({
     required this.id,
     required this.courseTitle,
     this.courseDescription,
     this.courseImageUrl,
     this.courseIconUrl,
-    this.enrollmentCost,
     this.durationHours,
     this.validityDays,
     this.slug,
@@ -74,14 +72,13 @@ class EnrollmentCourse {
     this.stats,
   });
 
-  factory EnrollmentCourse.fromJson(Map<String, dynamic> json) =>
-      EnrollmentCourse(
+  factory ListmentCourse.fromJson(Map<String, dynamic> json) =>
+      ListmentCourse(
         id: json['id'] ?? '',
         courseTitle: json['courseTitle'] ?? '',
         courseDescription: json['courseDescription'],
         courseImageUrl: json['courseImageUrl'],
         courseIconUrl: json['courseIconUrl'],
-        enrollmentCost: json['enrollmentCost'],
         durationHours: json['durationHours'],
         validityDays: json['validityDays'],
         slug: json['slug']?.toString(),
@@ -90,28 +87,26 @@ class EnrollmentCourse {
       );
 }
 
-class EnrollmentModel {
+class ListmentModel {
   final String id;
   final String courseId;
   final String studentId;
-  final String? enrollmentDate;
+  final String? ListmentDate;
   final String? expiryDate;
   final String? status;
-  final String? paymentId;
-  final EnrollmentProgress? progress;
-  final EnrollmentCertificate? certificate;
-  final EnrollmentCourse? course;
+  final ListmentProgress? progress;
+  final ListmentCertificate? certificate;
+  final ListmentCourse? course;
   final String? createdAt;
   final String? updatedAt;
 
-  EnrollmentModel({
+  ListmentModel({
     required this.id,
     required this.courseId,
     required this.studentId,
-    this.enrollmentDate,
+    this.ListmentDate,
     this.expiryDate,
     this.status,
-    this.paymentId,
     this.progress,
     this.certificate,
     this.course,
@@ -119,23 +114,22 @@ class EnrollmentModel {
     this.updatedAt,
   });
 
-  factory EnrollmentModel.fromJson(Map<String, dynamic> json) =>
-      EnrollmentModel(
+  factory ListmentModel.fromJson(Map<String, dynamic> json) =>
+      ListmentModel(
         id: json['id'] ?? '',
         courseId: json['courseId'] ?? '',
         studentId: json['studentId'] ?? '',
-        enrollmentDate: json['enrollmentDate']?.toString(),
+        ListmentDate: json['ListmentDate']?.toString(),
         expiryDate: json['expiryDate']?.toString(),
         status: json['status']?.toString(),
-        paymentId: json['paymentId']?.toString(),
         progress: json['progress'] is Map<String, dynamic>
-            ? EnrollmentProgress.fromJson(json['progress'])
+            ? ListmentProgress.fromJson(json['progress'])
             : null,
         certificate: json['certificate'] is Map<String, dynamic>
-            ? EnrollmentCertificate.fromJson(json['certificate'])
+            ? ListmentCertificate.fromJson(json['certificate'])
             : null,
         course: json['course'] is Map<String, dynamic>
-            ? EnrollmentCourse.fromJson(json['course'])
+            ? ListmentCourse.fromJson(json['course'])
             : null,
         createdAt: json['createdAt']?.toString(),
         updatedAt: json['updatedAt']?.toString(),

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
-import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
 import '../../../test/models/mock_test_models.dart';
 import '../../../test/presentation/pages/detail_pages/test_details.dart';
 import '../../models/search_models.dart';
 import '../../view_model/home_search_view_model.dart';
-// Note: Course enrollment info is not returned by SearchCourse model,
-// so navigate to EnrolledCourseDetailsPage which handles course details/enrollment.
+// Note: Course Listment info is not returned by SearchCourse model,
+// so navigate to ListedCourseDetailsPage which handles course details/Listment.
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -138,18 +137,25 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline,
-                  size: 48, color: AppColors.failure),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppColors.failure,
+              ),
               AppSpacing.verticalSpaceMedium,
-              CText(state.error!.message,
-                  type: TextType.bodyMedium,
-                  color: AppColors.gray600,
-                  textAlign: TextAlign.center),
+              CText(
+                state.error!.message,
+                type: TextType.bodyMedium,
+                color: AppColors.gray600,
+                textAlign: TextAlign.center,
+              ),
               AppSpacing.verticalSpaceSmall,
               ReusableButton(
-                  text: 'Retry',
-                  onPressed: () =>
-                      ref.read(homeSearchViewModelProvider.notifier).retrySearch()),
+                text: 'Retry',
+                onPressed: () => ref
+                    .read(homeSearchViewModelProvider.notifier)
+                    .retrySearch(),
+              ),
             ],
           ),
         ),
@@ -165,15 +171,19 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             children: [
               Icon(Icons.search_off, size: 48, color: AppColors.gray400),
               AppSpacing.verticalSpaceMedium,
-              CText('No courses or mock tests found',
-                  type: TextType.bodyMedium,
-                  color: AppColors.gray600,
-                  textAlign: TextAlign.center),
+              CText(
+                'No courses or mock tests found',
+                type: TextType.bodyMedium,
+                color: AppColors.gray600,
+                textAlign: TextAlign.center,
+              ),
               AppSpacing.verticalSpaceSmall,
-              CText('Try a different search term',
-                  type: TextType.bodySmall,
-                  color: AppColors.gray500,
-                  textAlign: TextAlign.center),
+              CText(
+                'Try a different search term',
+                type: TextType.bodySmall,
+                color: AppColors.gray500,
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -191,22 +201,30 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: Row(
               children: [
-                const Icon(Icons.menu_book_outlined,
-                    size: 20, color: AppColors.primary),
+                const Icon(
+                  Icons.menu_book_outlined,
+                  size: 20,
+                  color: AppColors.primary,
+                ),
                 const SizedBox(width: 8),
-                CText('Courses (${courses.length})',
-                    type: TextType.titleSmall,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black),
+                CText(
+                  'Courses (${courses.length})',
+                  type: TextType.titleSmall,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
               ],
             ),
           ),
-          ...courses.map((c) => Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: _CourseSearchCard(
-                    course: c, onTap: () => _navigateToCourse(context, c)),
-              )),
+          ...courses.map(
+            (c) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: _CourseSearchCard(
+                course: c,
+                onTap: () => _navigateToCourse(context, c),
+              ),
+            ),
+          ),
           AppSpacing.verticalSpaceMedium,
         ],
         if (mockTests.isNotEmpty) ...[
@@ -214,22 +232,30 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: Row(
               children: [
-                const Icon(Icons.quiz_outlined,
-                    size: 20, color: AppColors.secondary),
+                const Icon(
+                  Icons.quiz_outlined,
+                  size: 20,
+                  color: AppColors.secondary,
+                ),
                 const SizedBox(width: 8),
-                CText('Mock Tests (${mockTests.length})',
-                    type: TextType.titleSmall,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black),
+                CText(
+                  'Mock Tests (${mockTests.length})',
+                  type: TextType.titleSmall,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
               ],
             ),
           ),
-          ...mockTests.map((t) => Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: _MockTestSearchCard(
-                    mockTest: t, onTap: () => _navigateToMockTest(context, t)),
-              )),
+          ...mockTests.map(
+            (t) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              child: _MockTestSearchCard(
+                mockTest: t,
+                onTap: () => _navigateToMockTest(context, t),
+              ),
+            ),
+          ),
         ],
       ],
     );
@@ -238,36 +264,40 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   void _navigateToCourse(BuildContext context, SearchCourse course) {
     if (course.id == null || course.id!.isEmpty) {
       AppMethods.showCustomSnackBar(
-          context: context,
-          message: 'Course information is incomplete.',
-          isError: true);
+        context: context,
+        message: 'Course information is incomplete.',
+        isError: true,
+      );
       return;
     }
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => EnrolledCourseDetailsPage(courseId: course.id!)));
+      context,
+      MaterialPageRoute(
+        builder: (_) => ListedCourseDetailsPage(courseId: course.id!),
+      ),
+    );
   }
 
   void _navigateToMockTest(BuildContext context, SearchMockTest test) {
     if (test.id == null || test.id!.isEmpty) {
       AppMethods.showCustomSnackBar(
-          context: context,
-          message: 'Mock test information is incomplete.',
-          isError: true);
+        context: context,
+        message: 'Mock test information is incomplete.',
+        isError: true,
+      );
       return;
     }
     final mockTest = MockTest(
-        id: test.id!,
-        courseId: test.courseId ?? '',
-        title: test.title,
-        description: test.description,
-        cost: test.cost,
-        durationMinutes: test.durationMinutes);
+      id: test.id!,
+      courseId: test.courseId ?? '',
+      title: test.title,
+      description: test.description,
+      durationMinutes: test.durationMinutes,
+    );
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (_) => TestDetailsPage(initialTest: mockTest)));
+      context,
+      MaterialPageRoute(builder: (_) => TestDetailsPage(initialTest: mockTest)),
+    );
   }
 }
 
@@ -303,82 +333,56 @@ class _CourseSearchCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: CustomCachedNetworkImage(
-                    imageUrl: course.courseImageUrl ?? AppAssets.dummyNetImg,
-                    size: const Size(96, 64),
-                    fitStatus: BoxFit.cover),
+                  imageUrl: course.courseImageUrl ?? AppAssets.dummyNetImg,
+                  size: const Size(96, 64),
+                  fitStatus: BoxFit.cover,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CText(course.courseTitle ?? 'Course',
-                        type: TextType.bodyMedium,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis),
+                    CText(
+                      course.courseTitle ?? 'Course',
+                      type: TextType.bodyMedium,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 6),
                     if (course.categoryName != null)
-                      CText(course.categoryName!,
-                          type: TextType.bodySmall, color: AppColors.gray500),
+                      CText(
+                        course.categoryName!,
+                        type: TextType.bodySmall,
+                        color: AppColors.gray500,
+                      ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        if (course.enrollmentCost == 0) ...[
-                          Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                  color: AppColors.success.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(4)),
-                              child: const CText('FREE',
-                                  type: TextType.bodySmall,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.success)),
-                        ] else if (course.hasOffer == true &&
-                            course.enrollmentCost != null &&
-                            course.discountedPrice != null &&
-                            course.enrollmentCost! >
-                                course.discountedPrice!) ...[
-                          // Discounted Price
-                          CText(
-                            'Rs. ${NumberFormat.decimalPattern().format(course.discountedPrice)}',
-                            type: TextType.bodySmall,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black,
-                          ),
-                          const SizedBox(width: 6),
-                          // Original Price (Strikethrough)
-                          Text(
-                            'Rs. ${NumberFormat.decimalPattern().format(course.enrollmentCost)}',
-                            style: const TextStyle(
-                              fontSize: 11.0,
-                              color: AppColors.gray500,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                        ] else if (course.enrollmentCost != null) ...[
-                          CText('Rs. ${course.enrollmentCost}',
-                              type: TextType.bodySmall,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary),
-                        ],
                         const Spacer(),
                         if (course.durationHours != null)
-                          Row(children: [
-                            Icon(Icons.access_time,
-                                size: 12, color: AppColors.gray500),
-                            const SizedBox(width: 4),
-                            CText('${course.durationHours}h',
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                size: 12,
+                                color: AppColors.gray500,
+                              ),
+                              const SizedBox(width: 4),
+                              CText(
+                                '${course.durationHours}h',
                                 type: TextType.bodySmall,
-                                color: AppColors.gray500)
-                          ])
+                                color: AppColors.gray500,
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -421,58 +425,56 @@ class _MockTestSearchCard extends StatelessWidget {
                 color: AppColors.secondary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.quiz_outlined,
-                  color: AppColors.secondary, size: 24),
+              child: const Icon(
+                Icons.quiz_outlined,
+                color: AppColors.secondary,
+                size: 24,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CText(mockTest.title ?? 'Mock Test',
-                      type: TextType.bodyMedium,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  CText(
+                    mockTest.title ?? 'Mock Test',
+                    type: TextType.bodyMedium,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   if (mockTest.description != null) ...[
                     const SizedBox(height: 2),
-                    CText(mockTest.description!,
-                        type: TextType.bodySmall,
-                        color: AppColors.gray500,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis)
+                    CText(
+                      mockTest.description!,
+                      type: TextType.bodySmall,
+                      color: AppColors.gray500,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                   const SizedBox(height: 4),
-                  Row(children: [
-                    if (mockTest.cost != null && mockTest.cost! > 0) ...[
-                      CText('Rs. ${mockTest.cost!.toStringAsFixed(0)}',
-                          type: TextType.bodySmall,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary),
-                      const SizedBox(width: 12)
-                    ] else ...[
-                      Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                              color: AppColors.success.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4)),
-                          child: const CText('FREE',
+                  Row(
+                    children: [
+                      if (mockTest.durationMinutes != null)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              size: 12,
+                              color: AppColors.gray500,
+                            ),
+                            const SizedBox(width: 2),
+                            CText(
+                              '${mockTest.durationMinutes} min',
                               type: TextType.bodySmall,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.success)),
-                      const SizedBox(width: 12)
+                              color: AppColors.gray500,
+                            ),
+                          ],
+                        ),
                     ],
-                    if (mockTest.durationMinutes != null)
-                      Row(children: [
-                        Icon(Icons.access_time,
-                            size: 12, color: AppColors.gray500),
-                        const SizedBox(width: 2),
-                        CText('${mockTest.durationMinutes} min',
-                            type: TextType.bodySmall, color: AppColors.gray500)
-                      ])
-                  ]),
+                  ),
                 ],
               ),
             ),

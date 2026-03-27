@@ -30,7 +30,8 @@ class AppInfoContent {
     if (normalized is Map) {
       final map = _stringKeyedMap(normalized);
       final resolvedTitle = _asString(
-          map['title'] ?? map['heading'] ?? map['name'] ?? map['label']);
+        map['title'] ?? map['heading'] ?? map['name'] ?? map['label'],
+      );
       if (resolvedTitle != null && resolvedTitle.trim().isNotEmpty) {
         title = resolvedTitle.trim();
       }
@@ -44,7 +45,8 @@ class AppInfoContent {
             map['heroImage'],
       );
 
-      final primaryList = map['sections'] ??
+      final primaryList =
+          map['sections'] ??
           map['items'] ??
           map['paragraphs'] ??
           map['contents'];
@@ -74,7 +76,7 @@ class AppInfoContent {
         'payload',
         'info',
         'appInfo',
-        'attributes'
+        'attributes',
       ]) {
         if (map.containsKey(key) && map[key] != null) {
           addSection(AppInfoSection.fromDynamic(map[key]));
@@ -102,10 +104,7 @@ class AppInfoSection {
   final String? title;
   final List<String> paragraphs;
 
-  const AppInfoSection({
-    this.title,
-    this.paragraphs = const [],
-  });
+  const AppInfoSection({this.title, this.paragraphs = const []});
 
   bool get hasTitle => title != null && title!.trim().isNotEmpty;
   bool get hasContent => paragraphs.any((p) => p.trim().isNotEmpty);
@@ -179,117 +178,6 @@ class AppInfoSection {
   }
 }
 
-class AppFaqItem {
-  final String question;
-  final String answer;
-
-  const AppFaqItem({
-    required this.question,
-    required this.answer,
-  });
-
-  bool get hasQuestion => question.trim().isNotEmpty;
-  bool get hasAnswer => answer.trim().isNotEmpty;
-
-  factory AppFaqItem.fromDynamic(dynamic raw) {
-    if (raw is AppFaqItem) return raw;
-
-    if (raw is Map) {
-      final map = _stringKeyedMap(raw);
-      final question = _cleanAppInfoText(
-        _asString(
-            map['question'] ?? map['title'] ?? map['heading'] ?? map['label']),
-      );
-
-      String answer = '';
-      final answerCandidates = [
-        map['answer'],
-        map['content'],
-        map['description'],
-        map['body'],
-        map['text'],
-        map['details'],
-        map['response'],
-        map['value'],
-      ];
-
-      for (final candidate in answerCandidates) {
-        final paragraphs = _coerceParagraphs(candidate);
-        if (paragraphs.isNotEmpty) {
-          answer = paragraphs.join('\n\n');
-          break;
-        }
-      }
-
-      return AppFaqItem(
-        question: question.isNotEmpty ? question : 'Frequently Asked Question',
-        answer: answer,
-      );
-    }
-
-    if (raw is List) {
-      final items = _coerceParagraphs(raw);
-      final question = items.isNotEmpty ? items.first : '';
-      final answer = items.length > 1 ? items.sublist(1).join('\n\n') : '';
-      return AppFaqItem(
-        question: question.isNotEmpty ? question : 'Frequently Asked Question',
-        answer: answer,
-      );
-    }
-
-    final text = _cleanAppInfoText(_asString(raw));
-    return AppFaqItem(
-      question: text.isNotEmpty ? text : 'Frequently Asked Question',
-      answer: '',
-    );
-  }
-
-  static List<AppFaqItem> listFromResponse(dynamic response) {
-    final normalized = _normalizeResponse(response);
-    final items = <AppFaqItem>[];
-
-    void add(dynamic candidate) {
-      final faq = AppFaqItem.fromDynamic(candidate);
-      if (faq.hasQuestion || faq.hasAnswer) {
-        items.add(faq);
-      }
-    }
-
-    if (normalized is List) {
-      for (final item in normalized) {
-        add(item);
-      }
-    } else if (normalized is Map) {
-      final map = _stringKeyedMap(normalized);
-      bool foundList = false;
-      for (final key in const [
-        'faqs',
-        'items',
-        'data',
-        'list',
-        'questions',
-        'results'
-      ]) {
-        final value = map[key];
-        if (value is List) {
-          for (final item in value) {
-            add(item);
-          }
-          foundList = true;
-          break;
-        }
-      }
-      if (!foundList) {
-        add(map);
-      }
-    } else if (normalized != null) {
-      add(normalized);
-    }
-
-    return items;
-  }
-}
-
 List<AppInfoSection> _dedupeSections(List<AppInfoSection> sections) {
   final seen = <String>{};
   final result = <AppInfoSection>[];
@@ -339,7 +227,7 @@ List<String> _coerceParagraphs(dynamic value) {
       'text',
       'value',
       'answer',
-      'details'
+      'details',
     ]) {
       if (map.containsKey(key)) {
         result.addAll(_coerceParagraphs(map[key]));
@@ -423,7 +311,7 @@ dynamic _normalizeResponse(dynamic raw) {
       'payload',
       'info',
       'appInfo',
-      'attributes'
+      'attributes',
     ]) {
       if (map.containsKey(key) && map[key] != null) {
         next = map[key];

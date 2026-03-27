@@ -2,33 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
+import 'package:scholarsgyanacademy/features/courses/model/enrollment_models.dart';
 
 import '../../../../core/core.dart';
 import '../../../explore/explore.dart';
 import '../../courses.dart';
-import '../../model/enrollment_models.dart';
 import '../../service/course_service.dart';
 import '../../view_model/course_view_model.dart';
 
-class EnrolledCourseDetailsPage extends ConsumerStatefulWidget {
+class ListedCourseDetailsPage extends ConsumerStatefulWidget {
   final String courseId;
   final int initialTabIndex;
-  final EnrollmentModel? enrollment;
+  final ListmentModel? Listment;
 
-  const EnrolledCourseDetailsPage({
+  const ListedCourseDetailsPage({
     super.key,
     required this.courseId,
     this.initialTabIndex = 0,
-    this.enrollment,
+    this.Listment,
   });
 
   @override
-  ConsumerState<EnrolledCourseDetailsPage> createState() =>
-      _EnrolledCourseDetailsPageState();
+  ConsumerState<ListedCourseDetailsPage> createState() =>
+      _ListedCourseDetailsPageState();
 }
 
-class _EnrolledCourseDetailsPageState
-    extends ConsumerState<EnrolledCourseDetailsPage>
+class _ListedCourseDetailsPageState
+    extends ConsumerState<ListedCourseDetailsPage>
     with SingleTickerProviderStateMixin {
   static const List<String> _tabTitles = <String>[
     'Syllabus',
@@ -86,7 +86,7 @@ class _EnrolledCourseDetailsPageState
           );
         }
         final wasLoaded = previous?.details != null;
-        if (!wasLoaded && next.isEnrolled && mounted) {
+        if (!wasLoaded && next.isListed && mounted) {
           Future.microtask(() => _handleTabSelection(_tabController.index));
         }
       }
@@ -102,7 +102,7 @@ class _EnrolledCourseDetailsPageState
         : null;
     final isLoading = state.loadingDetails && details == null;
 
-    void _handleFreeEnrollment() async {
+    void _handleFreeListment() async {
       setState(() {
         // We can use a local loading state variable for the button if needed,
         // or just rely on the modal blocking interaction.
@@ -115,7 +115,7 @@ class _EnrolledCourseDetailsPageState
       );
 
       final courseService = ref.read(courseServiceProvider);
-      final result = await courseService.enrollFreeCourse(widget.courseId);
+      final result = await courseService.ListFreeCourse(widget.courseId);
 
       if (!mounted) return;
       Navigator.pop(context); // Dismiss loading dialog
@@ -124,7 +124,7 @@ class _EnrolledCourseDetailsPageState
         (failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Enrollment failed: ${failure.message}'),
+              content: Text('Could not access course: ${failure.message}'),
               backgroundColor: AppColors.failure,
             ),
           );
@@ -147,7 +147,7 @@ class _EnrolledCourseDetailsPageState
                   ),
                   AppSpacing.verticalSpaceMedium,
                   const CText(
-                    'You’ve successfully enrolled in this course',
+                    'You now have access to this course!',
                     type: TextType.titleMedium,
                     textAlign: TextAlign.center,
                     maxLines: 2,
@@ -157,7 +157,7 @@ class _EnrolledCourseDetailsPageState
                     text: 'Done',
                     onPressed: () {
                       Navigator.pop(context); // Close dialog
-                      // Refresh details to update state to "enrolled"
+                      // Refresh details to update state to "Listed"
                       ref
                           .read(coursesViewModelProvider.notifier)
                           .getDetails(widget.courseId);
@@ -333,14 +333,14 @@ class _EnrolledCourseDetailsPageState
       );
     }
 
-    EnrollmentModel? resolveEnrollment() {
-      if (widget.enrollment != null) {
-        return widget.enrollment;
+    ListmentModel? resolveListment() {
+      if (widget.Listment != null) {
+        return widget.Listment;
       }
-      final detailsEnrollment =
-          details?['enrollmentDetails'] ?? details?['enrollment'];
-      if (detailsEnrollment is Map<String, dynamic>) {
-        final map = Map<String, dynamic>.from(detailsEnrollment);
+      final detailsListment =
+          details?['ListmentDetails'] ?? details?['Listment'];
+      if (detailsListment is Map<String, dynamic>) {
+        final map = Map<String, dynamic>.from(detailsListment);
         final courseMap = course ?? map['course'];
         if (courseMap is Map<String, dynamic>) {
           map['course'] = courseMap;
@@ -349,12 +349,12 @@ class _EnrolledCourseDetailsPageState
           map.putIfAbsent('courseId', () => widget.courseId);
         }
         map.putIfAbsent('id', () => map['id'] ?? map['_id'] ?? widget.courseId);
-        return EnrollmentModel.fromJson(map);
+        return ListmentModel.fromJson(map);
       }
       return null;
     }
 
-    Widget buildEnrollmentOverview(EnrollmentModel? data) {
+    Widget buildListmentOverview(ListmentModel? data) {
       if (data == null) return const SizedBox.shrink();
       final progress = (data.progress?.progressPercentage ?? 0)
           .clamp(0, 100)
@@ -364,14 +364,14 @@ class _EnrolledCourseDetailsPageState
       final total = data.progress?.totalLectures ?? 0;
       final progressLabel = total > 0
           ? '$completed of $total lectures completed'
-          : 'Start learning to unlock progress insights';
+          : 'Start learning to see your progress here';
       final expiry = data.expiryDate != null
           ? DateTime.tryParse(data.expiryDate!)
           : null;
       final certificateIssued = data.certificate?.issued ?? false;
       final status = (data.status ?? 'active').toLowerCase();
-      final enrolledOn = data.enrollmentDate != null
-          ? DateTime.tryParse(data.enrollmentDate!)
+      final ListedOn = data.ListmentDate != null
+          ? DateTime.tryParse(data.ListmentDate!)
           : null;
 
       Widget statusChip() {
@@ -472,10 +472,10 @@ class _EnrolledCourseDetailsPageState
                   color: AppColors.gray600,
                 ),
               ],
-              if (enrolledOn != null) ...[
+              if (ListedOn != null) ...[
                 AppSpacing.verticalSpaceTiny,
                 CText(
-                  'Enrolled on ${DateFormat('d MMM, yyyy').format(enrolledOn)}',
+                  'Listed on ${DateFormat('d MMM, yyyy').format(ListedOn)}',
                   type: TextType.bodySmall,
                   color: AppColors.gray500,
                 ),
@@ -486,7 +486,7 @@ class _EnrolledCourseDetailsPageState
       );
     }
 
-    final enrollmentModel = resolveEnrollment();
+    final listmentData = resolveListment();
 
     Widget buildHighlights(
       CoursesState currentState,
@@ -549,14 +549,7 @@ class _EnrolledCourseDetailsPageState
       final totalStudents = asInt(stats['totalStudents']);
 
       final highlights = <_HighlightData>[];
-      // All courses are now free
-      highlights.add(
-        _HighlightData(
-          icon: Icons.card_giftcard_outlined,
-          label: 'Price',
-          value: 'Free',
-        ),
-      );
+
       if (duration != null) {
         highlights.add(
           _HighlightData(
@@ -641,7 +634,7 @@ class _EnrolledCourseDetailsPageState
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
               buildHeader(course),
-              // buildEnrollmentOverview(enrollmentModel),
+              // buildListmentOverview(listmentData),
               if (course != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -767,142 +760,7 @@ class _EnrolledCourseDetailsPageState
           ),
         ),
       ),
-      bottomNavigationBar: details != null && !state.isEnrolled
-          ? Container(
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              child: SafeArea(
-                child: Row(
-                  children: [
-                    // Enrollment fee on the left
-                    // Expanded(
-                    //   child: Column(
-                    //     crossAxisAlignment: CrossAxisAlignment.start,
-                    //     mainAxisSize: MainAxisSize.min,
-                    //     children: [
-                    //       CText(
-                    //         'Enrollment Fee',
-                    //         type: TextType.bodySmall,
-                    //         color: AppColors.gray600,
-                    //       ),
-                    //       const SizedBox(height: 4),
-                    //       Row(
-                    //         children: [
-                    //           if (course != null) ...[
-                    //             if (course['hasOffer'] == true &&
-                    //                 course['enrollmentCost'] != null &&
-                    //                 course['discountedPrice'] != null &&
-                    //                 (course['enrollmentCost'] as num) >
-                    //                     (course['discountedPrice'] as num)) ...[
-                    //               // Discounted Price
-                    //               CText(
-                    //                 'Rs. ${NumberFormat.decimalPattern().format(course['discountedPrice'])}',
-                    //                 type: TextType.headlineSmall,
-                    //                 color: AppColors.black,
-                    //                 fontWeight: FontWeight.bold,
-                    //               ),
-                    //               const SizedBox(width: 4),
-                    //               // Original Price (Strikethrough)
-                    //               Text(
-                    //                 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}',
-                    //                 style: const TextStyle(
-                    //                   fontSize:
-                    //                       12.0, // Assuming bodySmall size, adjust if needed
-                    //                   color: Color.fromRGBO(123, 138, 153, 1),
-                    //                   decoration: TextDecoration.lineThrough,
-                    //                 ),
-                    //               ),
-                    //             ] else ...[
-                    //               // Regular Price
-                    //               CText(
-                    //                 (course['enrollmentCost'] != null &&
-                    //                         (course['enrollmentCost'] is num))
-                    //                     ? ((course['enrollmentCost'] as num) ==
-                    //                               0
-                    //                           ? 'Free'
-                    //                           : 'Rs. ${NumberFormat.decimalPattern().format(course['enrollmentCost'])}')
-                    //                     : 'Rs. 0',
-                    //                 type: TextType.headlineSmall,
-                    //                 color: AppColors.black,
-                    //                 fontWeight: FontWeight.bold,
-                    //               ),
-                    //             ],
-                    //           ] else ...[
-                    //             const CText(
-                    //               'Rs. 0',
-                    //               type: TextType.headlineSmall,
-                    //               color: AppColors.black,
-                    //             ),
-                    //           ],
-                    //         ],
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    // const SizedBox(width: 12),
-                    // Enroll button on the right
-                    // if (((course != null &&
-                    //         course['hasOffer'] == true &&
-                    //         course['discountedPrice'] != null)
-                    //     ? ((course['discountedPrice'] as num) <= 0)
-                    //     : (((course?['enrollmentCost'] as num?) ?? 0) <= 0)))
-                    //   ReusableButton(
-                    //     text: 'Enroll Now',
-                    //     onPressed: _handleFreeEnrollment,
-                    //     backgroundColor: AppColors.secondary,
-                    //   )
-                    // else
-                    //   ReusableButton(
-                    //     text: 'Enroll Now',
-                    //     onPressed: () {
-                    //       final Map<String, dynamic> courseMap =
-                    //           Map<String, dynamic>.from(course!);
-                    //       if (!courseMap.containsKey('id') &&
-                    //           courseMap.containsKey('_id')) {
-                    //         courseMap['id'] = courseMap['_id'];
-                    //       } else if (!courseMap.containsKey('id')) {
-                    //         courseMap['id'] = widget.courseId;
-                    //       }
-                    //
-                    //       final courseModel = CourseModel.fromJson(courseMap);
-                    //       Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (_) => PackagePaymentPage(
-                    //             course: courseModel,
-                    //             enrollType: 'course_enrollment',
-                    //             courseId: widget.courseId,
-                    //           ),
-                    //         ),
-                    //       ).then((result) {
-                    //         if (result == true) {
-                    //           // Refresh details to update state to "enrolled"
-                    //           ref
-                    //               .read(coursesViewModelProvider.notifier)
-                    //               .getDetails(widget.courseId);
-                    //         }
-                    //       });
-                    //     },
-                    //     backgroundColor: AppColors.secondary,
-                    //   ),
-                  ],
-                ),
-              ),
-            )
-          : null,
+      bottomNavigationBar: null,
     );
   }
 
@@ -913,8 +771,8 @@ class _EnrolledCourseDetailsPageState
     if (index <= 0) return; // Syllabus tab does not need remote fetch
 
     final currentState = ref.read(coursesViewModelProvider);
-    if (!currentState.isEnrolled) {
-      debugPrint('Refresh: user not enrolled, skipping tab refresh');
+    if (!currentState.isListed) {
+      debugPrint('Refresh: user not Listed, skipping tab refresh');
       return;
     }
 
@@ -947,9 +805,9 @@ class _EnrolledCourseDetailsPageState
     if (!mounted) return;
     final currentState = ref.read(coursesViewModelProvider);
     if (index <= 0) return; // Syllabus tab does not trigger remote fetch
-    if (!currentState.isEnrolled) {
+    if (!currentState.isListed) {
       debugPrint(
-        'Tab "${_tabTitles[index]}" selected but user not enrolled; skipping secured fetch.',
+        'Tab "${_tabTitles[index]}" selected but user not Listed; skipping secured fetch.',
       );
       return;
     }

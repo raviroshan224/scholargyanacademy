@@ -16,9 +16,9 @@ class MaterialsInfo extends ConsumerWidget {
     final state = ref.watch(coursesViewModelProvider);
     final materials = state.materials;
     final subjects = state.subjects;
-    final bool isEnrolled = state.isEnrolled;
+    final bool isListed = state.isListed;
 
-    if (!isEnrolled) {
+    if (!isListed) {
       return const Center(child: CText('Empty access materials'));
     }
 
@@ -78,10 +78,10 @@ class MaterialsInfo extends ConsumerWidget {
     });
 
     Future<void> openMaterial(CourseMaterialModel material) async {
-      if (!isEnrolled) {
+      if (!isListed) {
         AppMethods.showCustomSnackBar(
           context: context,
-          message: 'Please enroll to access this material.',
+          message: 'Please List to access this material.',
           isError: true,
         );
         return;
@@ -109,10 +109,10 @@ class MaterialsInfo extends ConsumerWidget {
         );
       }
 
-      // Prefer downloadUrl sourced from enrolled course details payload.
-      final enrolledDownloadUrl = material.downloadUrl;
-      if (enrolledDownloadUrl != null && enrolledDownloadUrl.isNotEmpty) {
-        await openPdf(enrolledDownloadUrl);
+      // Prefer downloadUrl sourced from Listed course details payload.
+      final ListedDownloadUrl = material.downloadUrl;
+      if (ListedDownloadUrl != null && ListedDownloadUrl.isNotEmpty) {
+        await openPdf(ListedDownloadUrl);
         return;
       }
 
@@ -223,11 +223,11 @@ class MaterialsInfo extends ConsumerWidget {
                           ),
                           trailing: IconButton(
                             icon: Icon(
-                              isEnrolled
+                              isListed
                                   ? Icons.download_rounded
                                   : Icons.lock_outline,
                             ),
-                            color: isEnrolled
+                            color: isListed
                                 ? AppColors.primary
                                 : AppColors.gray400,
                             onPressed: () => openMaterial(material),

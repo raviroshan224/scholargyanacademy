@@ -70,30 +70,6 @@ class CourseDetailsPage extends ConsumerWidget {
           ),
         ),
       ),
-      // bottomNavigationBar: Padding(
-      //   padding: EdgeInsets.only(left: 4.0, right: 4.0, bottom: 16.0),
-      //   child: Container(
-      //     color: AppColors.white,
-      //     child: Row(
-      //       children: [
-      //         AppSpacing.horizontalSpaceLarge,
-      //         CText(" Rs. 4000", type: TextType.headlineMedium),
-      //         Spacer(),
-      //         ReusableButton(
-      //           text: "Enroll Now",
-      //           backgroundColor: AppColors.secondary,
-      //           onPressed: () {
-      //             Navigator.push(
-      //               context,
-      //               MaterialPageRoute(builder: (context) => CheckoutPage()),
-      //             );
-      //           },
-      //         ),
-      //         AppSpacing.horizontalSpaceLarge,
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

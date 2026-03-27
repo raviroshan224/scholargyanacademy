@@ -14,11 +14,11 @@ abstract class LiveClassService {
   Future<Either<Failure, LiveClassModel>> getLiveClassDetail(String id);
 
   /// Get Zoom SDK join token from backend
-  /// Backend generates JWT token and validates enrollment/timing
+  /// Backend generates JWT token and validates Listment/timing
   Future<Either<Failure, LiveClassJoinToken>> getJoinToken(String id);
 
   /// Get user's live classes for a specific course
-  /// Requires enrollment - backend validates eligibility
+  /// Requires Listment - backend validates eligibility
   /// Returns ongoing classes by default
   Future<Either<Failure, List<LiveClassModel>>> getMyClasses({
     String? courseId,

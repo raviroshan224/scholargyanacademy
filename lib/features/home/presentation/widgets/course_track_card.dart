@@ -1,19 +1,16 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
-import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
 import '../../../courses/presentation/pages/video_player_page.dart';
 import '../../../courses/service/course_service.dart';
 import '../../models/homepage_models.dart' as home_models;
 
 class CourseTrackCard extends ConsumerWidget {
-  const CourseTrackCard({
-    super.key,
-    this.course,
-    this.isLoading = false,
-  });
+  const CourseTrackCard({super.key, this.course, this.isLoading = false});
 
   final home_models.LatestOngoingCourse? course;
   final bool isLoading;
@@ -47,16 +44,18 @@ class CourseTrackCard extends ConsumerWidget {
     final progress = (course!.progressPercentage ?? 0).clamp(0, 100).round();
     final completed = course!.completedLectures ?? 0;
     final totalLectures = course!.totalLectures ?? 0;
-    
+
     // Use lecture thumbnail if available, otherwise course image
     final String? lectureThumbnail = course!.lastAccessedLectureThumbnail;
-    final String? coverImage = (lectureThumbnail != null && lectureThumbnail.isNotEmpty)
+    final String? coverImage =
+        (lectureThumbnail != null && lectureThumbnail.isNotEmpty)
         ? lectureThumbnail
         : course!.courseImageUrl;
-    
+
     final String? lectureTitle = course!.lastAccessedLectureTitle;
-    final bool hasLecture = course!.lastAccessedLectureId != null && 
-                            course!.lastAccessedLectureId!.isNotEmpty;
+    final bool hasLecture =
+        course!.lastAccessedLectureId != null &&
+        course!.lastAccessedLectureId!.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -83,8 +82,10 @@ class CourseTrackCard extends ConsumerWidget {
                 Positioned.fill(
                   child: coverImage != null && coverImage.trim().isNotEmpty
                       ? ImageFiltered(
-                          imageFilter:
-                              ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+                          imageFilter: ImageFilter.blur(
+                            sigmaX: 2.0,
+                            sigmaY: 2.0,
+                          ),
                           child: CustomCachedNetworkImage(
                             imageUrl: coverImage,
                             fitStatus: BoxFit.cover,
@@ -128,7 +129,9 @@ class CourseTrackCard extends ConsumerWidget {
                             child: SizedBox(
                               height: 110,
                               width: 110,
-                              child: coverImage != null && coverImage.trim().isNotEmpty
+                              child:
+                                  coverImage != null &&
+                                      coverImage.trim().isNotEmpty
                                   ? CustomCachedNetworkImage(
                                       imageUrl: coverImage,
                                       fitStatus: BoxFit.cover,
@@ -180,7 +183,9 @@ class CourseTrackCard extends ConsumerWidget {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 14.0, horizontal: 8.0),
+                          vertical: 14.0,
+                          horizontal: 8.0,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -192,7 +197,8 @@ class CourseTrackCard extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (lectureTitle != null && lectureTitle.isNotEmpty) ...[
+                            if (lectureTitle != null &&
+                                lectureTitle.isNotEmpty) ...[
                               const SizedBox(height: 2),
                               CText(
                                 lectureTitle,
@@ -207,7 +213,9 @@ class CourseTrackCard extends ConsumerWidget {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 6),
+                                    horizontal: 8,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Color.fromRGBO(255, 255, 255, 0.12),
                                     borderRadius: BorderRadius.circular(8),
@@ -222,8 +230,12 @@ class CourseTrackCard extends ConsumerWidget {
                                 Expanded(
                                   child: LinearProgressIndicator(
                                     value: progress / 100.0,
-                                    backgroundColor:
-                                        Color.fromRGBO(255, 255, 255, 0.15),
+                                    backgroundColor: Color.fromRGBO(
+                                      255,
+                                      255,
+                                      255,
+                                      0.15,
+                                    ),
                                     color: AppColors.primary,
                                     minHeight: 8,
                                   ),
@@ -239,9 +251,13 @@ class CourseTrackCard extends ConsumerWidget {
                             AppSpacing.verticalSpaceMedium,
                             Expanded(
                               child: CText(
-                                hasLecture ? 'Resume Watching' : 'Continue where you left off.',
+                                hasLecture
+                                    ? 'Resume Watching'
+                                    : 'Continue where you left off.',
                                 type: TextType.bodySmall,
-                                fontWeight: hasLecture ? FontWeight.w600 : FontWeight.normal,
+                                fontWeight: hasLecture
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                                 color: Color.fromRGBO(255, 255, 255, 0.9),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -264,37 +280,49 @@ class CourseTrackCard extends ConsumerWidget {
   void _handleTap(BuildContext context, WidgetRef ref) async {
     final cid = course!.id;
     if (cid == null || cid.isEmpty) return;
-    
+
     final lectureId = course!.lastAccessedLectureId;
-    
+
     // If no lecture ID, fall back to course detail page
     if (lectureId == null || lectureId.isEmpty) {
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => EnrolledCourseDetailsPage(courseId: cid)));
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ListedCourseDetailsPage(courseId: cid),
+        ),
+      );
       return;
     }
-    
+
     // Fetch watch URL and navigate to video player
     final courseService = ref.read(courseServiceProvider);
     final result = await courseService.watchLecture(lectureId);
-    
+
     result.fold(
       (failure) {
         // On error, show snackbar and navigate to course detail
         AppMethods.showCustomSnackBar(
           context: context,
-          message: failure.message.isNotEmpty 
-              ? failure.message 
+          message: failure.message.isNotEmpty
+              ? failure.message
               : 'Failed to load video. Opening course details.',
           isError: true,
         );
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => EnrolledCourseDetailsPage(courseId: cid)));
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => ListedCourseDetailsPage(courseId: cid),
+          ),
+        );
       },
       (payload) {
         // Extract URL from payload
         String? watchUrl;
-        const candidates = ['url', 'videoUrl', 'signedUrl', 'playbackUrl', 'streamUrl'];
+        const candidates = [
+          'url',
+          'videoUrl',
+          'signedUrl',
+          'playbackUrl',
+          'streamUrl',
+        ];
         for (final key in candidates) {
           final value = payload[key];
           if (value is String && value.trim().isNotEmpty) {
@@ -302,28 +330,36 @@ class CourseTrackCard extends ConsumerWidget {
             break;
           }
         }
-        
+
         if (watchUrl == null || watchUrl.isEmpty) {
           AppMethods.showCustomSnackBar(
             context: context,
             message: 'No playback URL available',
             isError: true,
           );
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => EnrolledCourseDetailsPage(courseId: cid)));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ListedCourseDetailsPage(courseId: cid),
+            ),
+          );
           return;
         }
-        
+
         // Navigate to video player with resume position
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => VideoPlayerPage(
-            url: watchUrl!,
-            title: course!.lastAccessedLectureTitle ?? course!.courseTitle ?? 'Resume',
-            lectureId: lectureId,
-            thumbnailUrl: course!.lastAccessedLectureThumbnail,
-            startPositionSeconds: 0,
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => VideoPlayerPage(
+              url: watchUrl!,
+              title:
+                  course!.lastAccessedLectureTitle ??
+                  course!.courseTitle ??
+                  'Resume',
+              lectureId: lectureId,
+              thumbnailUrl: course!.lastAccessedLectureThumbnail,
+              startPositionSeconds: 0,
+            ),
           ),
-        ));
+        );
       },
     );
   }

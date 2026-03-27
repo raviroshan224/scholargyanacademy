@@ -1,16 +1,16 @@
 import 'package:either_dart/either.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scholarsgyanacademy/features/courses/model/enrollment_models.dart';
 
 import '../../../config/services/remote_services/api_endpoints.dart';
 import '../../../config/services/remote_services/errors/failure.dart';
 import '../../../config/services/remote_services/http_service.dart';
 import '../../../config/services/remote_services/http_service_provider.dart';
-import '../model/enrollment_models.dart';
 import '../model/live_class_models.dart';
 
-abstract class EnrollmentService {
-  Future<Either<Failure, List<EnrollmentModel>>> myCourses();
-  Future<Either<Failure, EnrollmentModel>> byId(String id);
+abstract class ListmentService {
+  Future<Either<Failure, List<ListmentModel>>> myCourses();
+  Future<Either<Failure, ListmentModel>> byId(String id);
   Future<Either<Failure, Map<String, dynamic>>> courseDetails(String courseId);
   Future<Either<Failure, PagedLiveClasses>> myLiveClasses({
     String? courseId,
@@ -21,39 +21,39 @@ abstract class EnrollmentService {
   });
 }
 
-class EnrollmentServiceImpl implements EnrollmentService {
+class ListmentServiceImpl implements ListmentService {
   final HttpService _http;
-  EnrollmentServiceImpl(this._http);
+  ListmentServiceImpl(this._http);
 
   @override
-  Future<Either<Failure, List<EnrollmentModel>>> myCourses() async {
+  Future<Either<Failure, List<ListmentModel>>> myCourses() async {
     final res = await _http.get(
-      ApiEndPoints.enrollmentsMyCourses,
+      ApiEndPoints.ListmentsMyCourses,
       requiresAuth: true,
     );
     return res.fold((l) => Left(l), (r) {
       final list =
           (r.data as List?)
-              ?.map((e) => EnrollmentModel.fromJson(e as Map<String, dynamic>))
+              ?.map((e) => ListmentModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          <EnrollmentModel>[];
+          <ListmentModel>[];
       return Right(list);
     });
   }
 
   @override
-  Future<Either<Failure, EnrollmentModel>> byId(String id) async {
+  Future<Either<Failure, ListmentModel>> byId(String id) async {
     final res = await _http.get(
-      '${ApiEndPoints.enrollmentsById}/$id',
+      '${ApiEndPoints.ListmentsById}/$id',
       requiresAuth: true,
     );
     return res.fold((l) => Left(l), (r) {
       final data = r.data;
       if (data is Map<String, dynamic>)
-        return Right(EnrollmentModel.fromJson(data));
+        return Right(ListmentModel.fromJson(data));
       if (data is Map)
-        return Right(EnrollmentModel.fromJson(data.cast<String, dynamic>()));
-      return Left(Failure(message: 'Invalid enrollment response format'));
+        return Right(ListmentModel.fromJson(data.cast<String, dynamic>()));
+      return Left(Failure(message: 'Invalid Listment response format'));
     });
   }
 
@@ -62,7 +62,7 @@ class EnrollmentServiceImpl implements EnrollmentService {
     String courseId,
   ) async {
     final res = await _http.get(
-      '${ApiEndPoints.enrollmentsCourseDetails}/$courseId/details',
+      '${ApiEndPoints.ListmentsCourseDetails}/$courseId/details',
       requiresAuth: true,
     );
     return res.fold(
@@ -104,7 +104,7 @@ class EnrollmentServiceImpl implements EnrollmentService {
   }
 }
 
-final enrollmentServiceProvider = Provider<EnrollmentService>((ref) {
+final ListmentServiceProvider = Provider<ListmentService>((ref) {
   final http = ref.read(httpServiceProvider);
-  return EnrollmentServiceImpl(http);
+  return ListmentServiceImpl(http);
 });

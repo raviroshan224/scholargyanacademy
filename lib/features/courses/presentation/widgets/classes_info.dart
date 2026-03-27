@@ -13,13 +13,13 @@ class ClassesInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(coursesViewModelProvider);
 
-    // CRITICAL: Check enrollment first
-    // Live classes API requires enrollment
-    if (!state.isEnrolled) {
+    // CRITICAL: Check Listment first
+    // Live classes API requires Listment
+    if (!state.isListed) {
       return const Center(child: CText('Empty  classes'));
     }
 
-    // For enrolled users: show classes from API
+    // For Listed users: show classes from API
     final schedule = state.classes;
 
     if (state.loadingClasses && schedule.isEmpty) {
@@ -196,11 +196,11 @@ class ClassesInfo extends ConsumerWidget {
     }
 
     parse(details['classes']);
-    final enrollment = details['enrollmentDetails'];
-    if (results.isEmpty && enrollment is Map<String, dynamic>) {
-      parse(enrollment['classes']);
-    } else if (results.isEmpty && enrollment is Map) {
-      final map = Map<String, dynamic>.from(enrollment);
+    final Listment = details['ListmentDetails'];
+    if (results.isEmpty && Listment is Map<String, dynamic>) {
+      parse(Listment['classes']);
+    } else if (results.isEmpty && Listment is Map) {
+      final map = Map<String, dynamic>.from(Listment);
       parse(map['classes']);
     }
     return results;

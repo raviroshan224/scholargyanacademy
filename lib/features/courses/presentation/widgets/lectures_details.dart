@@ -13,12 +13,12 @@ Future<void> _openLecture(
   BuildContext context,
   WidgetRef ref,
   LectureModel lecture,
-  bool isEnrolled,
+  bool isListed,
 ) async {
-  if (!isEnrolled) {
+  if (!isListed) {
     AppMethods.showCustomSnackBar(
       context: context,
-      message: 'Please enroll to access this lecture.',
+      message: 'Please List to access this lecture.',
       isError: true,
     );
     return;
@@ -68,10 +68,10 @@ class LecturesDetails extends ConsumerWidget {
     final state = ref.watch(coursesViewModelProvider);
     final lectures = state.lectures;
     final subjects = state.subjects;
-    final bool isEnrolled = state.isEnrolled;
+    final bool isListed = state.isListed;
 
-    // if (!isEnrolled) {
-    //   return const Center(child: CText('Enroll to access lectures'));
+    // if (!isListed) {
+    //   return const Center(child: CText('List to access lectures'));
     // }
 
     if (state.loadingLectures && lectures.isEmpty) {
@@ -182,7 +182,7 @@ class LecturesDetails extends ConsumerWidget {
                         return _LectureCard(
                           key: ValueKey(lecture.id ?? i),
                           lecture: lecture,
-                          isEnrolled: isEnrolled,
+                          isListed: isListed,
                           onOpen: () {
                             showModalBottomSheet(
                               context: context,
@@ -196,7 +196,7 @@ class LecturesDetails extends ConsumerWidget {
                                     context,
                                     ref,
                                     lecture,
-                                    isEnrolled,
+                                    isListed,
                                   );
                                 },
                               ),
@@ -291,12 +291,12 @@ class _LectureCard extends StatelessWidget {
     Key? key,
     required this.lecture,
     required this.onOpen,
-    required this.isEnrolled,
+    required this.isListed,
   }) : super(key: key);
 
   final LectureModel lecture;
   final VoidCallback onOpen;
-  final bool isEnrolled;
+  final bool isListed;
 
   @override
   Widget build(BuildContext context) {
@@ -390,11 +390,11 @@ class _LectureCard extends StatelessWidget {
                           ),
                         ),
                         Icon(
-                          isEnrolled
+                          isListed
                               ? Icons.play_arrow_rounded
                               : Icons.lock_outline,
                           size: 18,
-                          color: isEnrolled
+                          color: isListed
                               ? AppColors.primary
                               : AppColors.gray400,
                         ),

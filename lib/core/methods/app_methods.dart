@@ -1,9 +1,7 @@
 import 'dart:core';
-import 'package:flutter/services.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:html/dom.dart' as dom;
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../constant/app_colors.dart';
 import '../constant/app_string.dart';
 import '../widgets/text/custom_text.dart';
@@ -96,20 +94,23 @@ class AppMethods {
   }
 
   static String parseHtmlToPlainText({required String htmlString}) {
-    dom.Document document = parse(htmlString);
-    return _parseElementToPlainText(document.body);
+    final document = parse(htmlString);
+    final plainText = _parseElementToPlainText(document.body)
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return plainText;
   }
 
   static String _parseElementToPlainText(dom.Element? element) {
     if (element == null) return '';
-    StringBuffer buffer = StringBuffer();
-    element.nodes.forEach((node) {
+    final buffer = StringBuffer();
+    for (final node in element.nodes) {
       if (node is dom.Text) {
         buffer.write(node.text);
       } else if (node is dom.Element) {
         buffer.write(_parseElementToPlainText(node));
       }
-    });
+    }
     return buffer.toString();
   }
 
@@ -140,19 +141,4 @@ class AppMethods {
     );
   }
 
-  static Future<void> urlLauncherHelper(
-      BuildContext context, String? url) async {
-    if (url != null && url.isNotEmpty) {
-      final Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        showCustomSnackBar(
-            context: context, message: 'Could not launch $url', isError: true);
-      }
-    } else {
-      showCustomSnackBar(
-          context: context, message: 'Invalid Url : $url', isError: true);
-    }
-  }
 }

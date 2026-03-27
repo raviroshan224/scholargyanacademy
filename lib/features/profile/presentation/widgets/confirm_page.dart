@@ -24,7 +24,7 @@ class ConfirmPage extends StatelessWidget {
                   CText('Congratulations!', type: TextType.headlineLarge),
                   AppSpacing.verticalSpaceMedium,
                   CText(
-                    'You have successfully enrolled in the course.',
+                    'You now have access to this course. Start learning right away!',
                     textAlign: TextAlign.center,
                     type: TextType.bodyMedium,
                     color: AppColors.gray600,

@@ -14,7 +14,7 @@ class MockTestList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(coursesViewModelProvider);
-    final isEnrolled = state.isEnrolled;
+    final isListed = state.isListed;
     List<MockTestModel> tests = state.mockTests;
     if (tests.isEmpty) {
       tests = _fallbackMockTests(state.details);
@@ -26,7 +26,7 @@ class MockTestList extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (!isEnrolled) {
+    if (!isListed) {
       return const Center(child: CText('No mock tests'));
     }
 
@@ -73,10 +73,10 @@ class MockTestList extends ConsumerWidget {
         final duration = test.durationLabel;
 
         void handleStart() {
-          if (!isEnrolled) {
+          if (!isListed) {
             AppMethods.showCustomSnackBar(
               context: context,
-              message: 'Please enroll to access this content.',
+              message: 'Please access a course to view its mock tests.',
               isError: true,
             );
             return;
@@ -173,11 +173,11 @@ class MockTestList extends ConsumerWidget {
                   ),
                   AppSpacing.horizontalSpaceSmall,
                   ReusableButton(
-                    backgroundColor: isEnrolled
+                    backgroundColor: isListed
                         ? AppColors.secondary
                         : AppColors.gray300,
                     text: 'Start',
-                    textColor: isEnrolled ? AppColors.white : AppColors.gray600,
+                    textColor: isListed ? AppColors.white : AppColors.gray600,
                     onPressed: handleStart,
                   ),
                 ],
@@ -214,11 +214,11 @@ class MockTestList extends ConsumerWidget {
     if (results.isEmpty) parse(details['tests']);
     if (results.isEmpty) parse(details['exams']);
 
-    final enrollment = details['enrollmentDetails'];
-    if (results.isEmpty && enrollment is Map<String, dynamic>) {
-      parse(enrollment['mockTests']);
-    } else if (results.isEmpty && enrollment is Map) {
-      final map = Map<String, dynamic>.from(enrollment);
+    final Listment = details['ListmentDetails'];
+    if (results.isEmpty && Listment is Map<String, dynamic>) {
+      parse(Listment['mockTests']);
+    } else if (results.isEmpty && Listment is Map) {
+      final map = Map<String, dynamic>.from(Listment);
       parse(map['mockTests']);
     }
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:scholarsgyanacademy/features/courses/model/enrollment_models.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
-import '../../model/enrollment_models.dart';
 import '../../view_model/course_view_model.dart';
-import '../pages/enrolled_course_details_page.dart';
 
 class MyCourses extends ConsumerStatefulWidget {
   const MyCourses({super.key});
@@ -19,28 +19,28 @@ class _MyCoursesState extends ConsumerState<MyCourses> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(coursesViewModelProvider.notifier).fetchEnrollments(force: true);
+      ref.read(coursesViewModelProvider.notifier).fetchListments(force: true);
     });
   }
 
   Future<void> _refresh() async {
     await ref
         .read(coursesViewModelProvider.notifier)
-        .fetchEnrollments(force: true);
+        .fetchListments(force: true);
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(coursesViewModelProvider);
-    final enrollments = state.enrollments;
-    final isLoading = state.loadingEnrollments;
-    final failure = state.enrollmentsError;
+    final Listments = state.Listments;
+    final isLoading = state.loadingListments;
+    final failure = state.ListmentsError;
 
-    if (isLoading && enrollments.isEmpty) {
+    if (isLoading && Listments.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (failure != null && enrollments.isEmpty) {
+    if (failure != null && Listments.isEmpty) {
       return RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
@@ -56,27 +56,27 @@ class _MyCoursesState extends ConsumerState<MyCourses> {
               color: AppColors.failure,
             ),
             AppSpacing.verticalSpaceMedium,
-            ReusableButton(
-              text: 'Retry',
-              onPressed: _refresh,
-            ),
+            ReusableButton(text: 'Retry', onPressed: _refresh),
           ],
         ),
       );
     }
 
-    if (enrollments.isEmpty) {
+    if (Listments.isEmpty) {
       return RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
           children: [
-            const Icon(Icons.school_outlined,
-                size: 48, color: AppColors.gray500),
+            const Icon(
+              Icons.school_outlined,
+              size: 48,
+              color: AppColors.gray500,
+            ),
             AppSpacing.verticalSpaceMedium,
             const CText(
-              'You have not enrolled in any courses yet.',
+              'You have not Listed in any courses yet.',
               type: TextType.bodyLarge,
               textAlign: TextAlign.center,
               color: AppColors.gray700,
@@ -97,51 +97,48 @@ class _MyCoursesState extends ConsumerState<MyCourses> {
       onRefresh: _refresh,
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-        itemCount: enrollments.length,
+        itemCount: Listments.length,
         separatorBuilder: (_, __) => AppSpacing.verticalSpaceMedium,
         itemBuilder: (context, index) {
-          final enrollment = enrollments[index];
-          return _EnrollmentCourseCard(
-            enrollment: enrollment,
-            onOpen: () => _openCourse(context, enrollment),
+          final Listment = Listments[index];
+          return _ListmentCourseCard(
+            Listment: Listment,
+            onOpen: () => _openCourse(context, Listment),
           );
         },
       ),
     );
   }
 
-  void _openCourse(BuildContext context, EnrollmentModel enrollment) {
+  void _openCourse(BuildContext context, ListmentModel Listment) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EnrolledCourseDetailsPage(
-          courseId: enrollment.courseId,
-          enrollment: enrollment,
+        builder: (_) => ListedCourseDetailsPage(
+          courseId: Listment.courseId,
+          Listment: Listment,
         ),
       ),
     );
   }
 }
 
-class _EnrollmentCourseCard extends StatelessWidget {
-  final EnrollmentModel enrollment;
+class _ListmentCourseCard extends StatelessWidget {
+  final ListmentModel Listment;
   final VoidCallback onOpen;
 
-  const _EnrollmentCourseCard({
-    required this.enrollment,
-    required this.onOpen,
-  });
+  const _ListmentCourseCard({required this.Listment, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
-    final course = enrollment.course;
+    final course = Listment.course;
     final title = course?.courseTitle ?? 'Course';
-    final progressPercentage =
-        (enrollment.progress?.progressPercentage ?? 0).clamp(0, 100);
-    final completedLectures = enrollment.progress?.completedLecturesCount ?? 0;
-    final totalLectures = enrollment.progress?.totalLectures ?? 0;
-    final expiry = _parseDate(enrollment.expiryDate);
-    final enrollmentDate = _parseDate(enrollment.enrollmentDate);
+    final progressPercentage = (Listment.progress?.progressPercentage ?? 0)
+        .clamp(0, 100);
+    final completedLectures = Listment.progress?.completedLecturesCount ?? 0;
+    final totalLectures = Listment.progress?.totalLectures ?? 0;
+    final expiry = _parseDate(Listment.expiryDate);
+    final ListmentDate = _parseDate(Listment.ListmentDate);
 
     // Calculate days until expiry
     String? expiryText;
@@ -178,8 +175,7 @@ class _EnrollmentCourseCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: CustomCachedNetworkImage(
-                    imageUrl:
-                        course?.courseIconUrl ?? course?.courseImageUrl,
+                    imageUrl: course?.courseIconUrl ?? course?.courseImageUrl,
                     size: Size(74, 74),
                     fitStatus: BoxFit.cover,
                   ),
@@ -205,10 +201,10 @@ class _EnrollmentCourseCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      if (enrollmentDate != null) ...[
+                      if (ListmentDate != null) ...[
                         const SizedBox(height: 4),
                         CText(
-                          'Enrolled: ${_formatDate(enrollmentDate)}',
+                          'Listed: ${_formatDate(ListmentDate)}',
                           type: TextType.bodySmall,
                           color: AppColors.gray600,
                         ),
@@ -335,11 +331,7 @@ class _StatusChip extends StatelessWidget {
         color: bgColor,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: CText(
-        label,
-        type: TextType.bodySmall,
-        color: textColor,
-      ),
+      child: CText(label, type: TextType.bodySmall, color: textColor),
     );
   }
 }

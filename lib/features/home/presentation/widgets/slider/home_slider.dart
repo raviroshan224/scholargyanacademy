@@ -1,10 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../../config/services/remote_services/api_endpoints.dart';
 import '../../../../../core/core.dart';
-import '../../../../courses/presentation/pages/enrolled_course_details_page.dart';
 import '../../../provider/slider_provider.dart';
 import '../../../view_model/homepage_view_model.dart';
 import 'image_slider.dart';
@@ -37,7 +37,7 @@ class HomeSliders extends ConsumerWidget {
               if (courseId == null || courseId.isEmpty) return;
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => EnrolledCourseDetailsPage(courseId: courseId),
+                  builder: (_) => ListedCourseDetailsPage(courseId: courseId),
                 ),
               );
             },
@@ -70,8 +70,7 @@ class HomeSliders extends ConsumerWidget {
                 if (courseId == null || courseId.isEmpty) return;
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) =>
-                        EnrolledCourseDetailsPage(courseId: courseId),
+                    builder: (_) => ListedCourseDetailsPage(courseId: courseId),
                   ),
                 );
               },

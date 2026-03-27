@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
-import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
 import '../../../courses/view_model/course_view_model.dart';
 import '../../../home/presentation/widgets/home_course_card.dart';
 import '../../../test/view_model/exam_view_model.dart';
@@ -366,7 +366,7 @@ class CoursesTab extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => EnrolledCourseDetailsPage(courseId: course.id),
+              builder: (_) => ListedCourseDetailsPage(courseId: course.id),
             ),
           );
         }

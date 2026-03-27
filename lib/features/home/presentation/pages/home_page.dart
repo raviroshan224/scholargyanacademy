@@ -744,9 +744,6 @@ CourseCardData _mapCourseToCardData(home_models.Course course) {
     imageUrl: imageUrl ?? AppAssets.errorImage,
     courseId: course.id,
     isSaved: course.isSaved ?? false,
-    enrollmentCost: course.enrollmentCost,
-    discountedPrice: course.discountedPrice,
-    hasOffer: course.hasOffer,
     durationHours: course.durationHours,
     validityDays: course.validityDays,
   );

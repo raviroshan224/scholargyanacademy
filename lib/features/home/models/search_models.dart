@@ -34,9 +34,6 @@ class SearchCourse {
     this.courseTitle,
     this.courseImageUrl,
     this.categoryName,
-    this.enrollmentCost,
-    this.discountedPrice,
-    this.hasOffer,
     this.durationHours,
     this.relevanceScore,
   });
@@ -45,9 +42,6 @@ class SearchCourse {
   final String? courseTitle;
   final String? courseImageUrl;
   final String? categoryName;
-  final int? enrollmentCost;
-  final int? discountedPrice;
-  final bool? hasOffer;
   final int? durationHours;
   final double? relevanceScore;
 
@@ -57,12 +51,6 @@ class SearchCourse {
       courseTitle: json['courseTitle']?.toString(),
       courseImageUrl: json['courseImageUrl']?.toString(),
       categoryName: json['categoryName']?.toString(),
-      enrollmentCost: _toInt(json['enrollmentCost']),
-      discountedPrice: _toInt(json['discountedPrice']),
-      hasOffer: json['hasOffer'] is bool
-          ? json['hasOffer'] as bool
-          : (json['hasOffer']?.toString().toLowerCase() == 'true' ||
-              json['hasOffer']?.toString() == '1'),
       durationHours: _toInt(json['durationHours']),
       relevanceScore: _toDouble(json['relevanceScore']),
     );
@@ -76,7 +64,6 @@ class SearchMockTest {
     this.courseId,
     this.title,
     this.description,
-    this.cost,
     this.durationMinutes,
     this.relevanceScore,
   });
@@ -85,7 +72,6 @@ class SearchMockTest {
   final String? courseId;
   final String? title;
   final String? description;
-  final double? cost;
   final int? durationMinutes;
   final double? relevanceScore;
 
@@ -95,7 +81,6 @@ class SearchMockTest {
       courseId: json['courseId']?.toString(),
       title: json['title']?.toString(),
       description: json['description']?.toString(),
-      cost: _toDouble(json['cost']),
       durationMinutes: _toInt(json['durationMinutes']),
       relevanceScore: _toDouble(json['relevanceScore']),
     );

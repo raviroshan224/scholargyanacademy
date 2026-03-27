@@ -43,7 +43,7 @@ abstract class CourseService {
   Future<Either<Failure, Map<String, dynamic>>> previewLecture(String id);
   Future<Either<Failure, Map<String, dynamic>>> watchLecture(String id);
   Future<Either<Failure, void>> completeLecture(String lectureId);
-  Future<Either<Failure, void>> enrollFreeCourse(String courseId);
+  Future<Either<Failure, void>> ListFreeCourse(String courseId);
   Future<Either<Failure, List<MockTestModel>>> mockTestsByCourse(
     String courseId, {
     int page = 1,
@@ -356,9 +356,9 @@ class CourseServiceImpl implements CourseService {
   }
 
   @override
-  Future<Either<Failure, void>> enrollFreeCourse(String courseId) async {
+  Future<Either<Failure, void>> ListFreeCourse(String courseId) async {
     final res = await _http.post(
-      ApiEndPoints.enrollFreeCourse,
+      ApiEndPoints.ListFreeCourse,
       data: {'courseId': courseId},
       requiresAuth: true,
     );

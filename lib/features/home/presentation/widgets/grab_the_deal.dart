@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:scholarsgyanacademy/features/courses/presentation/pages/listed_course_details_page.dart';
 
 import '../../../../core/core.dart';
-import '../../../courses/presentation/pages/enrolled_course_details_page.dart';
 import '../../models/homepage_models.dart' as home_models;
 
 class GrabTheDealList extends StatelessWidget {
@@ -45,7 +45,7 @@ class GrabTheDealList extends StatelessWidget {
             if (courseId == null || courseId.isEmpty) return;
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => EnrolledCourseDetailsPage(courseId: courseId),
+                builder: (_) => ListedCourseDetailsPage(courseId: courseId),
               ),
             );
           },
@@ -73,8 +73,6 @@ class GrabTheDealList extends StatelessWidget {
                           fitStatus: BoxFit.cover,
                         ),
                       ),
-                      // Free badge
-                      _buildBadge('FREE', const Color(0xFF0F9D58)),
                     ],
                   ),
                   const SizedBox(width: 12),
@@ -100,14 +98,10 @@ class GrabTheDealList extends StatelessWidget {
                             color: AppColors.gray600,
                           ),
                         ],
-                        const SizedBox(height: 8),
-
-                        // Free label and validity row
-                        Row(
-                          children: [
-                            _buildFreeLabel(),
-                            if (course.validityDays != null) ...[
-                              const Spacer(),
+                        if (course.validityDays != null) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
                               Icon(
                                 Icons.access_time,
                                 size: 14,
@@ -120,8 +114,8 @@ class GrabTheDealList extends StatelessWidget {
                                 color: AppColors.gray600,
                               ),
                             ],
-                          ],
-                        ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -134,49 +128,6 @@ class GrabTheDealList extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildBadge(String text, Color color) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(8),
-            bottomRight: Radius.circular(8),
-          ),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFreeLabel() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F9D58).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: const Text(
-        'Free',
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF0F9D58),
-        ),
-      ),
     );
   }
 }

@@ -4,16 +4,16 @@ import 'package:either_dart/either.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:scholarsgyanacademy/features/courses/model/enrollment_models.dart';
+import 'package:scholarsgyanacademy/features/courses/service/enrollment_service.dart';
 
 import '../../../config/services/remote_services/errors/failure.dart';
 import '../../../config/services/remote_services/http_service_provider.dart';
 import '../../profile/data/models/favorite_category_model.dart';
 import '../../profile/data/repo/category_repository.dart';
 import '../model/course_models.dart';
-import '../model/enrollment_models.dart';
 import '../model/live_class_models.dart';
 import '../service/course_service.dart';
-import '../service/enrollment_service.dart';
 import '../service/live_class_service.dart';
 
 class CoursesState {
@@ -27,7 +27,7 @@ class CoursesState {
   final bool loadingLectures;
   final bool loadingClasses;
   final bool loadingMockTests;
-  final bool loadingEnrollments;
+  final bool loadingListments;
   final bool loadingLiveClasses;
   final bool loadingUpcomingLiveClasses;
 
@@ -41,7 +41,7 @@ class CoursesState {
   final Failure? lecturesError;
   final Failure? classesError;
   final Failure? mockTestsError;
-  final Failure? enrollmentsError;
+  final Failure? ListmentsError;
   final Failure? liveClassesError;
   final Failure? upcomingLiveClassesError;
 
@@ -65,8 +65,8 @@ class CoursesState {
   final List<CourseClassModel> classes;
   final List<MockTestModel> mockTests;
 
-  final List<EnrollmentModel> enrollments;
-  final bool enrollmentsLoaded;
+  final List<ListmentModel> Listments;
+  final bool ListmentsLoaded;
 
   final List<LiveClassModel> liveClasses;
   final PagedMeta? liveClassesMeta;
@@ -90,7 +90,7 @@ class CoursesState {
     this.loadingLectures = false,
     this.loadingClasses = false,
     this.loadingMockTests = false,
-    this.loadingEnrollments = false,
+    this.loadingListments = false,
     this.loadingLiveClasses = false,
     this.loadingUpcomingLiveClasses = false,
     this.publicError,
@@ -103,7 +103,7 @@ class CoursesState {
     this.lecturesError,
     this.classesError,
     this.mockTestsError,
-    this.enrollmentsError,
+    this.ListmentsError,
     this.liveClassesError,
     this.upcomingLiveClassesError,
     this.publicCourses = const [],
@@ -124,8 +124,8 @@ class CoursesState {
     this.lectures = const [],
     this.classes = const [],
     this.mockTests = const [],
-    this.enrollments = const [],
-    this.enrollmentsLoaded = false,
+    this.Listments = const [],
+    this.ListmentsLoaded = false,
     this.liveClasses = const [],
     this.liveClassesMeta,
     this.liveClassesLoaded = false,
@@ -146,13 +146,13 @@ class CoursesState {
     return lastDetailsCourseId;
   }
 
-  bool get isEnrolled {
+  bool get isListed {
     final payload = details;
     if (payload == null) return false;
-    if (payload['isEnrolled'] == true) return true;
-    final enrollment = payload['enrollmentDetails'];
-    if (enrollment is Map<String, dynamic>) {
-      final status = enrollment['status']?.toString().toLowerCase();
+    if (payload['isListed'] == true) return true;
+    final Listment = payload['ListmentDetails'];
+    if (Listment is Map<String, dynamic>) {
+      final status = Listment['status']?.toString().toLowerCase();
       return status == 'active' || status == 'completed';
     }
     return false;
@@ -169,7 +169,7 @@ class CoursesState {
     bool? loadingLectures,
     bool? loadingClasses,
     bool? loadingMockTests,
-    bool? loadingEnrollments,
+    bool? loadingListments,
     bool? loadingLiveClasses,
     bool? loadingUpcomingLiveClasses,
     Failure? publicError,
@@ -182,7 +182,7 @@ class CoursesState {
     Failure? lecturesError,
     Failure? classesError,
     Failure? mockTestsError,
-    Failure? enrollmentsError,
+    Failure? ListmentsError,
     Failure? liveClassesError,
     Failure? upcomingLiveClassesError,
     bool clearPublicError = false,
@@ -195,7 +195,7 @@ class CoursesState {
     bool clearLecturesError = false,
     bool clearClassesError = false,
     bool clearMockTestsError = false,
-    bool clearEnrollmentsError = false,
+    bool clearListmentsError = false,
     bool clearLiveClassesError = false,
     bool clearUpcomingLiveClassesError = false,
     List<CourseModel>? publicCourses,
@@ -218,8 +218,8 @@ class CoursesState {
     List<LectureModel>? lectures,
     List<CourseClassModel>? classes,
     List<MockTestModel>? mockTests,
-    List<EnrollmentModel>? enrollments,
-    bool? enrollmentsLoaded,
+    List<ListmentModel>? Listments,
+    bool? ListmentsLoaded,
     List<LiveClassModel>? liveClasses,
     PagedMeta? liveClassesMeta,
     bool? liveClassesLoaded,
@@ -244,7 +244,7 @@ class CoursesState {
       loadingLectures: loadingLectures ?? this.loadingLectures,
       loadingClasses: loadingClasses ?? this.loadingClasses,
       loadingMockTests: loadingMockTests ?? this.loadingMockTests,
-      loadingEnrollments: loadingEnrollments ?? this.loadingEnrollments,
+      loadingListments: loadingListments ?? this.loadingListments,
       loadingLiveClasses: loadingLiveClasses ?? this.loadingLiveClasses,
       loadingUpcomingLiveClasses:
           loadingUpcomingLiveClasses ?? this.loadingUpcomingLiveClasses,
@@ -274,9 +274,9 @@ class CoursesState {
       mockTestsError: clearMockTestsError
           ? null
           : (mockTestsError ?? this.mockTestsError),
-      enrollmentsError: clearEnrollmentsError
+      ListmentsError: clearListmentsError
           ? null
-          : (enrollmentsError ?? this.enrollmentsError),
+          : (ListmentsError ?? this.ListmentsError),
       liveClassesError: clearLiveClassesError
           ? null
           : (liveClassesError ?? this.liveClassesError),
@@ -305,8 +305,8 @@ class CoursesState {
       lectures: lectures ?? this.lectures,
       classes: classes ?? this.classes,
       mockTests: mockTests ?? this.mockTests,
-      enrollments: enrollments ?? this.enrollments,
-      enrollmentsLoaded: enrollmentsLoaded ?? this.enrollmentsLoaded,
+      Listments: Listments ?? this.Listments,
+      ListmentsLoaded: ListmentsLoaded ?? this.ListmentsLoaded,
       liveClasses: liveClasses ?? this.liveClasses,
       liveClassesMeta: liveClassesMeta ?? this.liveClassesMeta,
       liveClassesLoaded: liveClassesLoaded ?? this.liveClassesLoaded,
@@ -331,13 +331,13 @@ class CoursesState {
 class CourseViewModel extends StateNotifier<CoursesState> {
   final CourseService _service;
   final CategoryRepository _categoryRepository;
-  final EnrollmentService _enrollmentService;
+  final ListmentService _ListmentService;
   final LiveClassService _liveClassService;
 
   CourseViewModel(
     this._service,
     this._categoryRepository,
-    this._enrollmentService,
+    this._ListmentService,
     this._liveClassService,
   ) : super(const CoursesState());
 
@@ -494,30 +494,27 @@ class CourseViewModel extends StateNotifier<CoursesState> {
     );
   }
 
-  Future<void> fetchEnrollments({bool force = false}) async {
-    if (state.loadingEnrollments) return;
-    if (!force && state.enrollmentsLoaded) return;
+  Future<void> fetchListments({bool force = false}) async {
+    if (state.loadingListments) return;
+    if (!force && state.ListmentsLoaded) return;
 
-    state = state.copyWith(
-      loadingEnrollments: true,
-      clearEnrollmentsError: true,
-    );
+    state = state.copyWith(loadingListments: true, clearListmentsError: true);
 
-    final response = await _enrollmentService.myCourses();
+    final response = await _ListmentService.myCourses();
 
     state = response.fold(
       (failure) =>
-          state.copyWith(loadingEnrollments: false, enrollmentsError: failure),
-      (enrollments) {
-        final sorted = [...enrollments]
+          state.copyWith(loadingListments: false, ListmentsError: failure),
+      (Listments) {
+        final sorted = [...Listments]
           ..sort((a, b) {
             DateTime? parse(String? value) {
               if (value == null || value.isEmpty) return null;
               return DateTime.tryParse(value);
             }
 
-            final aDate = parse(a.enrollmentDate) ?? parse(a.createdAt);
-            final bDate = parse(b.enrollmentDate) ?? parse(b.createdAt);
+            final aDate = parse(a.ListmentDate) ?? parse(a.createdAt);
+            final bDate = parse(b.ListmentDate) ?? parse(b.createdAt);
             if (aDate == null && bDate == null) return 0;
             if (aDate == null) return 1;
             if (bDate == null) return -1;
@@ -525,10 +522,10 @@ class CourseViewModel extends StateNotifier<CoursesState> {
           });
 
         return state.copyWith(
-          loadingEnrollments: false,
-          enrollments: sorted,
-          enrollmentsLoaded: true,
-          enrollmentsError: null,
+          loadingListments: false,
+          Listments: sorted,
+          ListmentsLoaded: true,
+          ListmentsError: null,
         );
       },
     );
@@ -565,7 +562,7 @@ class CourseViewModel extends StateNotifier<CoursesState> {
           : previous.liveClasses,
     );
 
-    final response = await _enrollmentService.myLiveClasses(
+    final response = await _ListmentService.myLiveClasses(
       status: status,
       courseId: courseId,
       subjectId: subjectId,
@@ -638,7 +635,7 @@ class CourseViewModel extends StateNotifier<CoursesState> {
           : state.upcomingLiveClasses,
     );
 
-    final response = await _enrollmentService.myLiveClasses(
+    final response = await _ListmentService.myLiveClasses(
       status: 'upcoming',
       page: page,
       limit: limit,
@@ -835,7 +832,7 @@ class CourseViewModel extends StateNotifier<CoursesState> {
         final mockTestsList = _parseMockTestsFromPayload(payload);
 
         // All content is free - no entitlement restrictions
-        final bool isEnrolledUser = _payloadIndicatesEnrollment(payload);
+        final bool isListedUser = _payloadIndicatesListment(payload);
 
         final updatedIds = <String>{...state.savedCourseIds};
         if (isSaved) {
@@ -917,21 +914,21 @@ class CourseViewModel extends StateNotifier<CoursesState> {
         );
 
         state = nextState;
-        if (isEnrolledUser) {
-          _loadEnrollmentCourseDetails(id);
+        if (isListedUser) {
+          _loadListmentCourseDetails(id);
         }
         return state;
       },
     );
   }
 
-  bool _payloadIndicatesEnrollment(Map<String, dynamic> payload) {
-    if (payload['isEnrolled'] == true) {
+  bool _payloadIndicatesListment(Map<String, dynamic> payload) {
+    if (payload['isListed'] == true) {
       return true;
     }
-    final enrollment = payload['enrollmentDetails'];
-    if (enrollment is Map<String, dynamic>) {
-      final status = enrollment['status']?.toString().toLowerCase();
+    final Listment = payload['ListmentDetails'];
+    if (Listment is Map<String, dynamic>) {
+      final status = Listment['status']?.toString().toLowerCase();
       if (status == 'active' || status == 'completed') {
         return true;
       }
@@ -939,15 +936,13 @@ class CourseViewModel extends StateNotifier<CoursesState> {
     return false;
   }
 
-  Future<void> _loadEnrollmentCourseDetails(String courseId) async {
-    // fetch course details available only to enrolled students
-    final res = await _enrollmentService.courseDetails(courseId);
+  Future<void> _loadListmentCourseDetails(String courseId) async {
+    // fetch course details available only to Listed students
+    final res = await _ListmentService.courseDetails(courseId);
     final previous = state;
     state = res.fold(
       (failure) {
-        debugPrint(
-          'enrollment course details not available: ${failure.message}',
-        );
+        debugPrint('Listment course details not available: ${failure.message}');
         return previous.copyWith(
           loadingClasses: false,
           loadingMockTests: false,
@@ -960,11 +955,9 @@ class CourseViewModel extends StateNotifier<CoursesState> {
       (payload) {
         try {
           final pretty = JsonEncoder.withIndent('  ').convert(payload);
-          debugPrint('enrolled course details($courseId):\n$pretty');
+          debugPrint('Listed course details($courseId):\n$pretty');
         } catch (_) {
-          debugPrint(
-            'enrolled course details($courseId): ${payload.toString()}',
-          );
+          debugPrint('Listed course details($courseId): ${payload.toString()}');
         }
         final classes = _parseClassesFromPayload(payload);
         final mockTests = _parseMockTestsFromPayload(payload);
@@ -973,7 +966,7 @@ class CourseViewModel extends StateNotifier<CoursesState> {
             final pretty = JsonEncoder.withIndent(
               '  ',
             ).convert(classes.map((c) => c.raw).toList());
-            debugPrint('enrolled classes parsed($courseId):\n$pretty');
+            debugPrint('Listed classes parsed($courseId):\n$pretty');
           } catch (_) {}
         }
         if (mockTests.isNotEmpty) {
@@ -981,10 +974,10 @@ class CourseViewModel extends StateNotifier<CoursesState> {
             final pretty = JsonEncoder.withIndent(
               '  ',
             ).convert(mockTests.map((m) => m.raw).toList());
-            debugPrint('enrolled mock tests parsed($courseId):\n$pretty');
+            debugPrint('Listed mock tests parsed($courseId):\n$pretty');
           } catch (_) {}
         }
-        final merged = _mergeEnrollmentDetailsPayload(previous, payload);
+        final merged = _mergeListmentDetailsPayload(previous, payload);
         return previous.copyWith(
           details: merged,
           classes: classes.isNotEmpty ? classes : previous.classes,
@@ -999,7 +992,7 @@ class CourseViewModel extends StateNotifier<CoursesState> {
   }
 
   Future<void> loadCourseExtras(String courseId) async {
-    if (!state.isEnrolled) {
+    if (!state.isListed) {
       return;
     }
     final futures = <Future<void>>[];
@@ -1509,14 +1502,14 @@ class CourseViewModel extends StateNotifier<CoursesState> {
     return result;
   }
 
-  Map<String, dynamic> _mergeEnrollmentDetailsPayload(
+  Map<String, dynamic> _mergeListmentDetailsPayload(
     CoursesState base,
     Map<String, dynamic> payload,
   ) {
     final merged = <String, dynamic>{...?base.details};
-    final enrollmentData =
-        payload['enrollment'] ?? payload['enrollmentDetails'] ?? payload;
-    merged['enrollmentDetails'] = enrollmentData;
+    final ListmentData =
+        payload['Listment'] ?? payload['ListmentDetails'] ?? payload;
+    merged['ListmentDetails'] = ListmentData;
     final classesValue = payload['classes'] ?? payload['classSchedules'];
     if (classesValue != null) {
       merged['classes'] = classesValue;
@@ -1539,12 +1532,12 @@ final coursesViewModelProvider =
     StateNotifierProvider<CourseViewModel, CoursesState>((ref) {
       final service = ref.read(courseServiceProvider);
       final categoryRepo = ref.read(courseCategoryRepositoryProvider);
-      final enrollmentService = ref.read(enrollmentServiceProvider);
+      final ListmentService = ref.read(ListmentServiceProvider);
       final liveClassService = ref.read(liveClassServiceProvider);
       return CourseViewModel(
         service,
         categoryRepo,
-        enrollmentService,
+        ListmentService,
         liveClassService,
       );
     });
